@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { searchFlights, FlightSearchParams } from "@/src/lib/flights";
 import { searchHotels, HotelSearchParams } from "@/src/lib/hotels";
-import { FaPlane, FaHotel, FaShieldAlt, FaMapMarkerAlt, FaCalendarAlt, FaUserFriends, FaChevronDown, FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { FaPlane, FaHotel, FaShieldAlt, FaMapMarkerAlt, FaCalendarAlt, FaUserFriends, FaChevronDown, FaChevronLeft, FaChevronRight, FaWhatsapp, FaPhoneAlt, FaCheckCircle } from "react-icons/fa";
 import { supabase } from "@/src/lib/supabase";
 
 interface SearchFormProps {
@@ -134,141 +134,142 @@ export default function SearchForm({ onResults, onSearchStart, onError, autoSear
     );
 
     return (
-        <div className="w-full max-w-6xl mx-auto font-sans relative">
-            {/* Card Container */}
-            <div className="bg-white rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.18)]">
-                {/* Tabs */}
-                <div className="flex border-b border-gray-100 overflow-hidden rounded-t-2xl bg-gray-50/50">
-                    {tabs.map((tab) => (
-                        <button
-                            key={tab.id}
-                            onClick={() => setActiveTab(tab.id as any)}
-                            className={`flex-1 px-2 md:px-8 py-3 md:py-4 text-[9px] md:text-sm font-black tracking-widest flex items-center justify-center gap-1 md:gap-2 transition-all
-                                ${activeTab === tab.id
-                                    ? "bg-[#f6405f] text-white shadow-[0_-4px_10px_rgba(246,64,95,0.2)]"
-                                    : "text-gray-500 hover:bg-gray-100/50"
-                                }`}
-                        >
-                            <span className="hidden md:block text-sm">{tab.icon}</span>
-                            <span className="uppercase whitespace-nowrap">{tab.label.split(' ')[0]}</span>
-                        </button>
-                    ))}
-                </div>
-
-                {/* Form Container */}
-                <div className="bg-white px-5 md:px-10 pt-6 pb-8 rounded-b-2xl relative">
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                        {/* Trip Type */}
-                        <div className="flex items-center justify-center md:justify-start gap-6 md:gap-8 text-gray-800 text-sm font-semibold overflow-x-auto no-scrollbar pb-1">
-                            {['round', 'oneway'].map((type) => (
-                                <label key={type} className="flex items-center gap-2 md:gap-3 cursor-pointer group shrink-0">
-                                    <div className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center transition-all ${tripType === type ? 'border-[#f6405f]' : 'border-gray-300 group-hover:border-gray-400'}`}>
-                                        {tripType === type && <div className="w-1.5 h-1.5 bg-[#f6405f] rounded-full"></div>}
-                                    </div>
-                                    <input type="radio" className="hidden" checked={tripType === type} onChange={() => setTripType(type)} />
-                                    <span className="uppercase tracking-wide text-[10px] md:text-xs">{type === 'round' ? 'Round Trip' : 'One Way'}</span>
-                                </label>
-                            ))}
-                        </div>
-
-                        {/* Inputs Row 1 */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
-                            <div className="relative">
-                                <InputField
-                                    icon={<FaMapMarkerAlt />}
-                                    placeholder="FROM: Origin"
-                                    name="origin"
-                                    value={flightParams.origin}
-                                    onChange={handleFlightChange}
-                                    required={!flightParams.origin}
-                                />
-                            </div>
-                            <div className="relative">
-                                <InputField
-                                    icon={<FaMapMarkerAlt />}
-                                    placeholder="TO: Destination"
-                                    name="destination"
-                                    value={flightParams.destination}
-                                    onChange={handleFlightChange}
-                                />
-                            </div>
-
-                            {/* Custom Date Inputs */}
-                            <div className="relative" ref={departureRef}>
-                                <div
-                                    onClick={() => setShowDeparturePicker(!showDeparturePicker)}
-                                    className="w-full pl-10 md:pl-12 pr-4 py-3 md:py-4 bg-white text-gray-800 border border-gray-200 rounded-md text-xs md:text-sm cursor-pointer flex items-center justify-between shadow-lg"
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <FaCalendarAlt className="text-gray-400" />
-                                        <span className="truncate">{flightParams.departureDate || "Departure"}</span>
-                                    </div>
-                                    <FaChevronDown className="text-gray-300 text-[10px]" />
-                                </div>
-                                {showDeparturePicker && (
-                                    <CalendarOverlay
-                                        onSelect={(d) => handleDateSelect(d, 'departure')}
-                                        selected={flightParams.departureDate}
-                                        onClose={() => setShowDeparturePicker(false)}
-                                    />
-                                )}
-                            </div>
-
-                            <div className="relative" ref={returnRef}>
-                                <div
-                                    onClick={() => tripType === 'round' && setShowReturnPicker(!showReturnPicker)}
-                                    className={`w-full pl-10 md:pl-12 pr-4 py-3 md:py-4 bg-white text-gray-800 border border-gray-200 rounded-md text-xs md:text-sm flex items-center justify-between shadow-lg ${tripType === 'oneway' ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <FaCalendarAlt className="text-gray-400" />
-                                        <span className="truncate">{flightParams.returnDate || "Return"}</span>
-                                    </div>
-                                    <FaChevronDown className="text-gray-300 text-[10px]" />
-                                </div>
-                                {showReturnPicker && (
-                                    <CalendarOverlay
-                                        onSelect={(d) => handleDateSelect(d, 'return')}
-                                        selected={flightParams.returnDate}
-                                        minDate={flightParams.departureDate}
-                                        onClose={() => setShowReturnPicker(false)}
-                                    />
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Inputs Row 2: Selectors */}
-                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                            <SelectField name="adults" icon={<FaUserFriends />} label="Adult" value={flightParams.adults} onChange={handleFlightChange} options={[1, 2, 3, 4, 5, 6, 7, 8, 9]} />
-                            <SelectField name="children" icon={<FaUserFriends />} label="Children" value={flightParams.children} onChange={handleFlightChange} options={[0, 1, 2, 3, 4, 5]} />
-                            <SelectField name="infant" icon={<FaUserFriends size={12} />} label="Infants" value={flightParams.infant} onChange={handleFlightChange} options={[0, 1, 2]} />
-                            <SelectField name="cabin" icon={<FaPlane />} label="Economy" value={flightParams.cabin} onChange={handleFlightChange} options={['Economy', 'Premium Economy', 'Business', 'First Class']} />
-                        </div>
-
-                        {/* Contact Info (hidden in compact UI but kept for logic) */}
-                        <div className="hidden">
-                            <input name="name" value={flightParams.name} onChange={handleFlightChange} />
-                            <input name="email" value={flightParams.email} onChange={handleFlightChange} />
-                            <input name="phone" value={flightParams.phone} onChange={handleFlightChange} />
-                        </div>
-
-                        <div className="flex justify-end pt-4">
+        <>
+            <div className="w-full max-w-6xl mx-auto font-sans relative">
+                <div className="bg-white rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.18)]">
+                    {/* Tabs */}
+                    <div className="flex border-b border-gray-100 overflow-hidden rounded-t-2xl bg-gray-50/50">
+                        {tabs.map((tab) => (
                             <button
-                                id="search-submit-btn"
-                                type="submit"
-                                disabled={loading || !isFormValid}
-                                className={`w-full md:w-auto px-10 py-3 md:py-4 rounded-full text-xs md:text-sm font-black uppercase tracking-[0.2em] shadow-xl transition-all
-                                    ${loading || !isFormValid
-                                        ? "bg-gray-300 cursor-not-allowed text-gray-500"
-                                        : "bg-[#f6405f] hover:bg-black hover:scale-105 text-white shadow-red-500/20"
+                                key={tab.id}
+                                onClick={() => setActiveTab(tab.id as any)}
+                                className={`flex-1 px-2 md:px-8 py-3 md:py-4 text-[9px] md:text-sm font-black tracking-widest flex items-center justify-center gap-1 md:gap-2 transition-all
+                                ${activeTab === tab.id
+                                        ? "bg-[#C41E22] text-white shadow-[0_-4px_10px_rgba(196,30,34,0.2)]"
+                                        : "text-gray-500 hover:bg-gray-100/50"
                                     }`}
                             >
-                                {loading ? "Searching..." : "Find a Deal"}
+                                <span className="hidden md:block text-sm">{tab.icon}</span>
+                                <span className="uppercase whitespace-nowrap">{tab.label.split(' ')[0]}</span>
                             </button>
-                        </div>
-                    </form>
+                        ))}
+                    </div>
+
+                    {/* Form Container */}
+                    <div className="bg-white px-5 md:px-10 pt-6 pb-8 rounded-b-2xl relative">
+                        <form onSubmit={handleSubmit} className="space-y-6">
+                            {/* Trip Type */}
+                            <div className="flex items-center justify-center md:justify-start gap-6 md:gap-8 text-gray-800 text-sm font-semibold overflow-x-auto no-scrollbar pb-1">
+                                {['round', 'oneway'].map((type) => (
+                                    <label key={type} className="flex items-center gap-2 md:gap-3 cursor-pointer group shrink-0">
+                                        <div className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center transition-all ${tripType === type ? 'border-[#C41E22]' : 'border-gray-300 group-hover:border-gray-400'}`}>
+                                            {tripType === type && <div className="w-1.5 h-1.5 bg-[#C41E22] rounded-full"></div>}
+                                        </div>
+                                        <input type="radio" className="hidden" checked={tripType === type} onChange={() => setTripType(type)} />
+                                        <span className="uppercase tracking-wide text-[10px] md:text-xs">{type === 'round' ? 'Round Trip' : 'One Way'}</span>
+                                    </label>
+                                ))}
+                            </div>
+
+                            {/* Inputs Row 1 */}
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+                                <div className="relative">
+                                    <InputField
+                                        icon={<FaMapMarkerAlt />}
+                                        placeholder="FROM: Origin"
+                                        name="origin"
+                                        value={flightParams.origin}
+                                        onChange={handleFlightChange}
+                                        required={!flightParams.origin}
+                                    />
+                                </div>
+                                <div className="relative">
+                                    <InputField
+                                        icon={<FaMapMarkerAlt />}
+                                        placeholder="TO: Destination"
+                                        name="destination"
+                                        value={flightParams.destination}
+                                        onChange={handleFlightChange}
+                                    />
+                                </div>
+
+                                {/* Custom Date Inputs */}
+                                <div className="relative" ref={departureRef}>
+                                    <div
+                                        onClick={() => setShowDeparturePicker(!showDeparturePicker)}
+                                        className="w-full pl-10 md:pl-12 pr-4 py-3 md:py-4 bg-white text-gray-800 border border-gray-200 rounded-md text-xs md:text-sm cursor-pointer flex items-center justify-between shadow-lg"
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <FaCalendarAlt className="text-gray-400" />
+                                            <span className="truncate">{flightParams.departureDate || "Departure"}</span>
+                                        </div>
+                                        <FaChevronDown className="text-gray-300 text-[10px]" />
+                                    </div>
+                                    {showDeparturePicker && (
+                                        <CalendarOverlay
+                                            onSelect={(d) => handleDateSelect(d, 'departure')}
+                                            selected={flightParams.departureDate}
+                                            onClose={() => setShowDeparturePicker(false)}
+                                        />
+                                    )}
+                                </div>
+
+                                <div className="relative" ref={returnRef}>
+                                    <div
+                                        onClick={() => tripType === 'round' && setShowReturnPicker(!showReturnPicker)}
+                                        className={`w-full pl-10 md:pl-12 pr-4 py-3 md:py-4 bg-white text-gray-800 border border-gray-200 rounded-md text-xs md:text-sm flex items-center justify-between shadow-lg ${tripType === 'oneway' ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
+                                    >
+                                        <div className="flex items-center gap-3">
+                                            <FaCalendarAlt className="text-gray-400" />
+                                            <span className="truncate">{flightParams.returnDate || "Return"}</span>
+                                        </div>
+                                        <FaChevronDown className="text-gray-300 text-[10px]" />
+                                    </div>
+                                    {showReturnPicker && (
+                                        <CalendarOverlay
+                                            onSelect={(d) => handleDateSelect(d, 'return')}
+                                            selected={flightParams.returnDate}
+                                            minDate={flightParams.departureDate}
+                                            onClose={() => setShowReturnPicker(false)}
+                                        />
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Inputs Row 2: Selectors */}
+                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                                <SelectField name="adults" icon={<FaUserFriends />} label="Adult" value={flightParams.adults} onChange={handleFlightChange} options={[1, 2, 3, 4, 5, 6, 7, 8, 9]} />
+                                <SelectField name="children" icon={<FaUserFriends />} label="Children" value={flightParams.children} onChange={handleFlightChange} options={[0, 1, 2, 3, 4, 5]} />
+                                <SelectField name="infant" icon={<FaUserFriends size={12} />} label="Infants" value={flightParams.infant} onChange={handleFlightChange} options={[0, 1, 2]} />
+                                <SelectField name="cabin" icon={<FaPlane />} label="Economy" value={flightParams.cabin} onChange={handleFlightChange} options={['Economy', 'Premium Economy', 'Business', 'First Class']} />
+                            </div>
+
+                            {/* Contact Info (hidden in compact UI but kept for logic) */}
+                            <div className="hidden">
+                                <input name="name" value={flightParams.name} onChange={handleFlightChange} />
+                                <input name="email" value={flightParams.email} onChange={handleFlightChange} />
+                                <input name="phone" value={flightParams.phone} onChange={handleFlightChange} />
+                            </div>
+
+                            <div className="flex justify-end pt-4">
+                                <button
+                                    id="search-submit-btn"
+                                    type="submit"
+                                    disabled={loading || !isFormValid}
+                                    className={`w-full md:w-auto px-10 py-3 md:py-4 rounded-full text-xs md:text-sm font-black uppercase tracking-[0.2em] shadow-xl transition-all
+                                    ${loading || !isFormValid
+                                            ? "bg-gray-300 cursor-not-allowed text-gray-500"
+                                            : "bg-[#f6405f] hover:bg-black hover:scale-105 text-white shadow-red-500/20"
+                                        }`}
+                                >
+                                    {loading ? "Searching..." : "Find a Deal"}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
-        </div>
+        </>
     );
 }
 
