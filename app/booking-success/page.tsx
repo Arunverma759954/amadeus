@@ -87,7 +87,7 @@ export default function BookingSuccessPage() {
                             <div className="flex justify-between items-center mb-6">
                                 <div>
                                     <div className="text-[10px] font-medium text-white/70 uppercase mb-1">DELHI, T1</div>
-                                    <div className="text-5xl font-normal tracking-tight text-[#4dff4d]">{firstSegment.departure.iataCode}</div>
+                                    <div className="text-3xl sm:text-4xl md:text-5xl font-normal tracking-tight text-[#4dff4d]">{firstSegment.departure.iataCode}</div>
                                 </div>
                                 <div className="text-center flex flex-col items-center">
                                     <div className="text-[10px] font-medium text-white/70">{itinerary.duration.replace('PT', '').toLowerCase()}</div>
@@ -96,7 +96,7 @@ export default function BookingSuccessPage() {
                                 </div>
                                 <div className="text-right">
                                     <div className="text-[10px] font-medium text-white/70 uppercase mb-1">LUCKNOW, T3</div>
-                                    <div className="text-5xl font-normal tracking-tight text-[#4dff4d]">{lastSegment.arrival.iataCode}</div>
+                                    <div className="text-3xl sm:text-4xl md:text-5xl font-normal tracking-tight text-[#4dff4d]">{lastSegment.arrival.iataCode}</div>
                                 </div>
                             </div>
 
@@ -137,7 +137,7 @@ export default function BookingSuccessPage() {
                         {/* Details Grid */}
                         <div className="px-6 pb-8">
                             <div className="mb-6"><div className="text-sm font-semibold text-gray-800">MR John Doe</div></div>
-                            <div className="grid grid-cols-3 gap-y-6 text-left">
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-y-6 text-left">
                                 <div>
                                     <div className="text-[10px] text-gray-400 uppercase mb-1">PNR</div>
                                     <div className="text-sm font-bold text-gray-800">{pnr}</div>

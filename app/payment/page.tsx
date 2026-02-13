@@ -58,7 +58,7 @@ export default function PaymentPage() {
                     <FaArrowLeft size={10} /> Back
                 </button>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-180px)] min-h-[500px]">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-auto lg:h-[calc(100vh-180px)] min-h-[500px]">
                     {/* LEFT: Payment Form */}
                     <div className="lg:col-span-8 bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
                         <div className="p-6 border-b border-gray-50 flex items-center gap-3 bg-gray-50/50">
