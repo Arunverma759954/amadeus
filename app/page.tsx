@@ -13,7 +13,7 @@ import DetailsModal from "./components/DetailsModal";
 import SearchingOverlay from "./components/SearchingOverlay";
 import { supabase } from "@/src/lib/supabase";
 import { searchFlights } from "@/src/lib/flights";
-import { FaChevronDown, FaWhatsapp, FaPhoneAlt, FaCheckCircle, FaStar, FaGoogle, FaChevronLeft, FaChevronRight, FaDollarSign, FaThumbsUp, FaMedal, FaArrowLeft, FaPlane, FaSearch } from "react-icons/fa";
+import { FaChevronDown, FaWhatsapp, FaPhoneAlt, FaCheckCircle, FaStar, FaGoogle, FaChevronLeft, FaChevronRight, FaDollarSign, FaThumbsUp, FaMedal, FaArrowLeft, FaPlane, FaSearch, FaTimes } from "react-icons/fa";
 
 export default function Home() {
     const [results, setResults] = useState<any | null>(null);
@@ -33,6 +33,7 @@ export default function Home() {
     const [baggageOnly, setBaggageOnly] = useState(false);
     const [maxPrice, setMaxPrice] = useState<number | null>(null);
     const [showFilters, setShowFilters] = useState(false);
+    const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
     const [searchParams, setSearchParams] = useState<any>(null); // Store current search params for slider use
     const searchCache = useRef<Record<string, any>>({});
 
@@ -238,7 +239,7 @@ export default function Home() {
                 <div className="sticky top-0 z-[1000] w-full bg-white shadow-md">
                     <Header />
                     <div className="bg-white border-t border-gray-100">
-                        <div className="max-w-7xl mx-auto px-4 sm:px-8 py-3">
+                        <div className="max-w-7xl mx-auto px-2 sm:px-8 py-2 md:py-3">
                             <ModifySearchForm
                                 initialParams={searchParams}
                                 markup={pricingAdjustment}
@@ -252,10 +253,27 @@ export default function Home() {
                     </div>
                 </div>
 
-                <div className="max-w-7xl mx-auto px-4 sm:px-8 py-8">
+                <div className="max-w-7xl mx-auto px-4 sm:px-8 py-4 md:py-8">
+                    {/* Mobile Only: Quick Filter Button */}
+                    <div className="lg:hidden flex items-center justify-between gap-4 mb-4">
+                        <button
+                            onClick={() => setIsMobileFiltersOpen(true)}
+                            className="flex-1 bg-white border border-gray-300 rounded-xl py-3 px-4 flex items-center justify-center gap-2 text-sm font-bold text-[#071C4B] shadow-sm"
+                        >
+                            <FaSearch className="text-blue-600" />
+                            Filters & Sort
+                        </button>
+                    </div>
                     <div className="flex flex-col lg:flex-row gap-8">
-                        {/* LEFT: Sidebar Filters */}
-                        <aside className="hidden lg:block w-72 shrink-0 space-y-6">
+                        {/* Sidebar Filters (Desktop always, Mobile Drawer) */}
+                        <aside className={`${isMobileFiltersOpen ? 'fixed inset-0 z-[2000] bg-white p-6 overflow-y-auto block' : 'hidden'} lg:block w-full lg:w-72 shrink-0 space-y-6`}>
+                            <div className="lg:hidden flex justify-between items-center mb-6">
+                                <h2 className="text-xl font-black text-[#071C4B]">Filters</h2>
+                                <button onClick={() => setIsMobileFiltersOpen(false)} className="p-2 text-gray-400">
+                                    <FaTimes size={20} />
+                                </button>
+                            </div>
+
                             <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden sticky top-24">
                                 <div className="p-6 border-b border-gray-50 space-y-3 bg-gray-50/30">
                                     <div className="flex justify-between items-center">
@@ -282,7 +300,7 @@ export default function Home() {
                                     </div>
                                 </div>
 
-                                <div className="p-6 space-y-8 max-h-[calc(100vh-200px)] overflow-y-auto no-scrollbar">
+                                <div className="p-6 space-y-8 max-h-[calc(100vh-200px)] lg:max-h-[calc(100vh-200px)] overflow-y-auto no-scrollbar">
                                     {/* Stops */}
                                     <div className="space-y-4">
                                         <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Total Stops</h4>
@@ -369,6 +387,16 @@ export default function Home() {
                                             </div>
                                         </div>
                                     )}
+
+                                    {/* Mobile: Apply Button */}
+                                    <div className="lg:hidden pt-6">
+                                        <button
+                                            onClick={() => setIsMobileFiltersOpen(false)}
+                                            className="w-full bg-[#071C4B] text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest"
+                                        >
+                                            Apply Filters
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </aside>
@@ -376,8 +404,8 @@ export default function Home() {
                         {/* RIGHT: Results & Sorting */}
                         <div className="flex-1 space-y-6">
                             {/* Date Selector Slider - Premium Lufthansa Style */}
-                            <div className="bg-white rounded-[2rem] shadow-sm border border-gray-100 p-2 overflow-hidden flex items-center">
-                                <div className="flex-1 flex gap-2">
+                            <div className="bg-white rounded-2xl md:rounded-[2rem] shadow-sm border border-gray-100 p-2 overflow-x-auto no-scrollbar flex items-center">
+                                <div className="flex gap-2 min-w-max md:min-w-0 md:flex-1">
                                     {(() => {
                                         const baseDate = searchParams?.departureDate ? new Date(searchParams.departureDate) : new Date();
                                         return Array.from({ length: 7 }).map((_, i) => {
@@ -394,14 +422,14 @@ export default function Home() {
                                                 <button
                                                     key={i}
                                                     onClick={() => handleDateChange(ds)}
-                                                    className={`flex-1 py-4 flex flex-col items-center justify-center rounded-2xl transition-all duration-300 ${isSelected ? 'bg-[#071C4B] text-white shadow-xl shadow-blue-900/20 scale-[1.05] z-10' : 'hover:bg-gray-50 text-gray-500'
+                                                    className={`w-20 md:flex-1 py-3 md:py-4 flex flex-col items-center justify-center rounded-xl md:rounded-2xl transition-all duration-300 ${isSelected ? 'bg-[#071C4B] text-white shadow-xl shadow-blue-900/20 scale-[1.05] z-10' : 'hover:bg-gray-50 text-gray-500'
                                                         }`}
                                                 >
-                                                    <span className={`text-[9px] font-black uppercase tracking-tighter mb-1 ${isSelected ? 'opacity-60' : 'text-gray-400'}`}>
+                                                    <span className={`text-[8px] md:text-[9px] font-black uppercase tracking-tighter mb-1 ${isSelected ? 'opacity-60' : 'text-gray-400'}`}>
                                                         {date.toLocaleDateString('en-US', { weekday: 'short' })}
                                                     </span>
-                                                    <span className="text-lg font-black leading-none mb-1">{date.getDate()}</span>
-                                                    <span className={`text-[8px] font-bold ${isSelected ? 'text-white/80' : 'text-green-600'}`}>
+                                                    <span className="text-base md:text-lg font-black leading-none mb-1">{date.getDate()}</span>
+                                                    <span className={`text-[7px] md:text-[8px] font-bold ${isSelected ? 'text-white/80' : 'text-green-600'}`}>
                                                         ₹{(estP / 1000).toFixed(1)}k
                                                     </span>
                                                 </button>
@@ -412,24 +440,24 @@ export default function Home() {
                             </div>
 
                             {/* Sort Actions */}
-                            <div className="flex items-center justify-between pb-2">
-                                <h1 className="text-lg font-black text-[#071C4B] uppercase tracking-widest flex items-center gap-3">
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-2">
+                                <h1 className="text-base md:text-lg font-black text-[#071C4B] uppercase tracking-widest flex items-center gap-3">
                                     Departure Flights
                                     <span className="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-[9px] font-black border border-blue-100">
                                         {filteredResults.length} / {results?.length || 0} Found
                                     </span>
                                 </h1>
-                                <div className="flex gap-2">
+                                <div className="flex gap-2 w-full sm:w-auto">
                                     <button
                                         onClick={() => setSortBy('price')}
-                                        className={`px-5 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all ${sortBy === 'price' ? 'bg-[#071C4B] text-white border-[#071C4B]' : 'bg-white text-gray-400 border-gray-100 hover:bg-gray-50'
+                                        className={`flex-1 sm:flex-none px-4 md:px-5 py-2 md:py-2.5 rounded-xl text-[8px] md:text-[9px] font-black uppercase tracking-widest border transition-all ${sortBy === 'price' ? 'bg-[#071C4B] text-white border-[#071C4B]' : 'bg-white text-gray-400 border-gray-100 hover:bg-gray-50'
                                             }`}
                                     >
                                         Cheapest
                                     </button>
                                     <button
                                         onClick={() => setSortBy('duration')}
-                                        className={`px-5 py-2.5 rounded-xl text-[9px] font-black uppercase tracking-widest border transition-all ${sortBy === 'duration' ? 'bg-[#071C4B] text-white border-[#071C4B]' : 'bg-white text-gray-400 border-gray-100 hover:bg-gray-50'
+                                        className={`flex-1 sm:flex-none px-4 md:px-5 py-2 md:py-2.5 rounded-xl text-[8px] md:text-[9px] font-black uppercase tracking-widest border transition-all ${sortBy === 'duration' ? 'bg-[#071C4B] text-white border-[#071C4B]' : 'bg-white text-gray-400 border-gray-100 hover:bg-gray-50'
                                             }`}
                                     >
                                         Fastest
@@ -506,14 +534,14 @@ export default function Home() {
     }
 
     return (
-        <main className="min-h-screen bg-gray-50 relative font-sans">
+        <main className="min-h-screen bg-gray-50 relative font-sans overflow-x-hidden">
             <Header />
 
             {/* Hero */}
-            <section className="relative z-50">
+            <section className="relative z-50 overflow-visible">
                 <HeroSlider />
-                <div className="absolute bottom-0 left-0 w-full z-[100] translate-y-1/2 px-4">
-                    <div className="max-w-7xl mx-auto">
+                <div className="absolute bottom-0 left-0 right-0 z-[100] translate-y-1/2 flex justify-center px-4">
+                    <div className="w-full max-w-7xl">
                         <SearchForm
                             onResults={handleResults}
                             onSearchStart={handleSearchStart}
@@ -525,16 +553,16 @@ export default function Home() {
             </section>
 
             {/* Info Section */}
-            <section className="bg-[#f7f7f7] py-16 md:py-20 mt-40 md:mt-48">
-                <div className="max-w-6xl mx-auto px-4 md:px-0 space-y-12">
-                    <h2 className="text-4xl md:text-5xl font-handwriting text-[#111827] text-center mb-8">
+            <section className="bg-[#f7f7f7] py-12 md:py-20 mt-[450px] sm:mt-[520px] lg:mt-40 transition-all duration-700">
+                <div className="max-w-6xl mx-auto px-4 md:px-6 lg:px-0 space-y-10 md:space-y-16">
+                    <h2 className="text-3xl md:text-5xl font-handwriting text-[#111827] text-center mb-4 md:mb-8 leading-tight">
                         Fly Safe with HiFi Travels Hassle-free
                     </h2>
                     {/* Row 1: Image LEFT, Text RIGHT */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-start">
-                        <div className="bg-white shadow-[0_10px_30px_rgba(0,0,0,0.12)] p-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 items-start">
+                        <div className="bg-white shadow-[0_10px_30px_rgba(0,0,0,0.12)] p-2 md:p-3 overflow-hidden group">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src="/10.jpg" alt="Friendly travel assistance" className="w-full h-64 md:h-72 object-cover" />
+                            <img src="https://images.pexels.com/photos/1008155/pexels-photo-1008155.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Friendly travel assistance" className="w-full h-56 md:h-72 object-cover group-hover:scale-105 transition-transform duration-700" />
                         </div>
                         <div className="text-left text-gray-700 text-sm md:text-base leading-relaxed">
                             <p className="mb-3">
@@ -560,25 +588,16 @@ export default function Home() {
                     </div>
 
                     {/* Row 2: Text LEFT, Image RIGHT */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
-                        <div className="text-left">
-                            <h3 className="text-xl md:text-2xl font-semibold text-[#111827] mb-4">
-                                Why We are the Best Flight Booking Service Providers?
-                            </h3>
-                            <p className="text-sm md:text-base text-gray-700 leading-relaxed mb-3">
-                                At HiFi Travels, we believe in offering best-in-class services that give you
-                                peace of mind and do not burden you. Though our pricing is best in the market,
-                                if you find a good quote elsewhere, send us the details, we’ll match it and give
-                                you even more value on your next booking.
-                            </p>
-                            <p className="text-sm md:text-base text-gray-700 leading-relaxed">
-                                All we need is a copy of your fare details including base fare info, and we’ll
-                                take care of the rest. We don’t just promise value but we also deliver it.
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 items-start">
+                        <div className="text-left text-gray-700 text-sm md:text-base leading-relaxed order-2 md:order-1">
+                            <h3 className="text-2xl font-bold text-[#071C4B] mb-4 uppercase tracking-tighter">Your Trusted Travel Companion</h3>
+                            <p className="mb-3">
+                                From 24/7 dedicated support to flexible booking options, we prioritize your convenience at every step. Whether you&apos;re traveling for leisure or business, our team ensures a seamless journey across all international and domestic routes.
                             </p>
                         </div>
-                        <div className="bg-white shadow-[0_10px_30px_rgba(0,0,0,0.12)] p-3">
+                        <div className="bg-white shadow-[0_10px_30px_rgba(0,0,0,0.12)] p-2 md:p-3 overflow-hidden group order-1 md:order-2">
                             {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src="/8.jpg" alt="Best flight service" className="w-full h-64 md:h-72 object-cover" />
+                            <img src="https://images.pexels.com/photos/347141/pexels-photo-347141.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Team support" className="w-full h-56 md:h-72 object-cover group-hover:scale-105 transition-transform duration-700" />
                         </div>
                     </div>
                 </div>
@@ -619,19 +638,19 @@ export default function Home() {
             {/* Top Recommended Destinations */}
             <section className="bg-white py-16 md:py-20">
                 <div className="max-w-6xl mx-auto px-4 md:px-0">
-                    <h2 className="text-2xl md:text-3xl font-semibold text-center mb-10">
+                    <h2 className="text-2xl md:text-3xl font-bold text-center mb-10 text-[#071C4B] uppercase tracking-tighter">
                         Top Recommended Destinations
                     </h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
                         {[
-                            { city: "London, United States", price: "From $339 r/t", image: "/1.jpg" },
-                            { city: "Paris, France", price: "From $477 r/t", image: "/2.jpg" },
-                            { city: "Rome, Italy", price: "From $479 r/t", image: "/3.jpg" },
-                            { city: "Frankfurt, Germany", price: "From $545 r/t", image: "/4.jpg" },
-                            { city: "London, United States", price: "From $339 r/t", image: "/1.jpg" },
-                            { city: "Paris, France", price: "From $477 r/t", image: "/2.jpg" },
-                            { city: "Rome, Italy", price: "From $479 r/t", image: "/3.jpg" },
-                            { city: "Frankfurt, Germany", price: "From $545 r/t", image: "/4.jpg" },
+                            { city: "London, UK", price: "From $339 r/t", image: "/OIP.webp" },
+                            { city: "Paris, France", price: "From $477 r/t", image: "/OIP (1).webp" },
+                            { city: "Rome, Italy", price: "From $479 r/t", image: "/OIP (2).webp" },
+                            { city: "Frankfurt, Germany", price: "From $545 r/t", image: "/OIP (3).webp" },
+                            { city: "Dubai, UAE", price: "From $610 r/t", image: "/OIP (4).webp" },
+                            { city: "Singapore", price: "From $520 r/t", image: "/OIP (5).webp" },
+                            { city: "Tokyo, Japan", price: "From $780 r/t", image: "/OIP (6).webp" },
+                            { city: "New York, USA", price: "From $890 r/t", image: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?q=80&w=800&auto=format&fit=crop" },
                         ].map((item, idx) => (
                             <div
                                 key={idx}
@@ -686,14 +705,14 @@ export default function Home() {
 
                         {/* Right testimonials slider mock */}
                         <div className="w-full md:w-3/4 relative">
-                            <button className="hidden md:flex absolute -left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white shadow-md items-center justify-center text-gray-500 hover:bg-gray-50">
+                            <button className="hidden lg:flex absolute -left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white shadow-md items-center justify-center text-gray-500 hover:bg-gray-50 z-10 transition-all hover:scale-110">
                                 <FaChevronLeft size={14} />
                             </button>
-                            <button className="hidden md:flex absolute -right-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white shadow-md items-center justify-center text-gray-500 hover:bg-gray-50">
+                            <button className="hidden lg:flex absolute -right-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white shadow-md items-center justify-center text-gray-500 hover:bg-gray-50 z-10 transition-all hover:scale-110">
                                 <FaChevronRight size={14} />
                             </button>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {[
                                     {
                                         name: "Atif",
@@ -816,43 +835,39 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* Popular Destinations */}
-            <section className="bg-[#f7f7f7] py-16 md:py-20">
-                <div className="max-w-6xl mx-auto px-4 md:px-0">
-                    <h2 className="text-2xl md:text-3xl font-semibold text-center mb-10">
+            <section className="bg-[#f7f7f7] py-16 md:py-24">
+                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-0">
+                    <h2 className="text-2xl md:text-3xl font-bold text-center mb-10 text-[#071C4B] uppercase tracking-tighter">
                         Popular Destinations
                     </h2>
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-5 md:gap-6">
                         {[
-                            "Adelaide",
-                            "Brisbane",
-                            "Cairns",
-                            "Canberra",
-                            "Darwin",
-                            "Gold Coast",
-                            "Hobart",
-                            "Melbourne",
-                            "Perth",
-                            "Sydney",
-                            "India",
-                            "Pakistan",
-                            "Sri Lanka",
-                            "Nepal",
-                            "Bangladesh",
+                            { name: "Adelaide", img: "/1.jpg" },
+                            { name: "Brisbane", img: "/2.jpg" },
+                            { name: "Cairns", img: "/3.jpg" },
+                            { name: "Canberra", img: "/4.jpg" },
+                            { name: "Darwin", img: "/5.jpg" },
+                            { name: "Gold Coast", img: "/OIP.webp" },
+                            { name: "Hobart", img: "/OIP (1).webp" },
+                            { name: "Melbourne", img: "/OIP (2).webp" },
+                            { name: "Perth", img: "/OIP (3).webp" },
+                            { name: "Sydney", img: "/OIP (4).webp" },
+                            { name: "India", img: "/OIP (5).webp" },
+                            { name: "Pakistan", img: "/OIP (6).webp" },
+                            { name: "Sri Lanka", img: "/8.jpg" },
+                            { name: "Nepal", img: "/10.jpg" },
+                            { name: "Bangladesh", img: "https://images.unsplash.com/photo-1583212292454-1fe6229603b7?q=80&w=400&auto=format&fit=crop" },
                         ].map((city, idx) => (
-                            <div key={city + idx} className="bg-white rounded-md shadow-[0_6px_18px_rgba(0,0,0,0.12)] overflow-hidden">
-                                <div className="h-28 md:h-32 bg-gray-200">
+                            <div key={city.name + idx} className="bg-white rounded-md shadow-[0_6px_18px_rgba(0,0,0,0.12)] overflow-hidden group">
+                                <div className="h-28 md:h-32 bg-gray-200 overflow-hidden">
                                     <img
-                                        src={`/dest-${(idx % 5) + 1}.jpg`}
-                                        alt={city}
-                                        className="w-full h-full object-cover"
-                                        onError={(e) => {
-                                            (e.currentTarget as HTMLImageElement).style.display = "none";
-                                        }}
+                                        src={city.img}
+                                        alt={city.name}
+                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                     />
                                 </div>
                                 <div className="bg-[#0b72e7] text-white text-center py-2 text-xs md:text-sm font-semibold">
-                                    {city}
+                                    {city.name}
                                 </div>
                             </div>
                         ))}

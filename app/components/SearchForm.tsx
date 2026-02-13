@@ -138,45 +138,45 @@ export default function SearchForm({ onResults, onSearchStart, onError, autoSear
             {/* Card Container */}
             <div className="bg-white rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.18)]">
                 {/* Tabs */}
-                <div className="flex border-b border-gray-100 overflow-hidden rounded-t-2xl">
+                <div className="flex border-b border-gray-100 overflow-hidden rounded-t-2xl bg-gray-50/50">
                     {tabs.map((tab) => (
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id as any)}
-                            className={`flex-1 px-8 py-4 text-sm font-semibold tracking-wide flex items-center justify-center gap-2 transition-all
+                            className={`flex-1 px-2 md:px-8 py-3 md:py-4 text-[9px] md:text-sm font-black tracking-widest flex items-center justify-center gap-1 md:gap-2 transition-all
                                 ${activeTab === tab.id
-                                    ? "bg-[#f6405f] text-white"
-                                    : "bg-white text-gray-600 hover:bg-gray-50"
+                                    ? "bg-[#f6405f] text-white shadow-[0_-4px_10px_rgba(246,64,95,0.2)]"
+                                    : "text-gray-500 hover:bg-gray-100/50"
                                 }`}
                         >
-                            <span className="text-xs">{tab.icon}</span>
-                            <span className="uppercase">{tab.label}</span>
+                            <span className="hidden md:block text-sm">{tab.icon}</span>
+                            <span className="uppercase whitespace-nowrap">{tab.label.split(' ')[0]}</span>
                         </button>
                     ))}
                 </div>
 
                 {/* Form Container */}
-                <div className="bg-white px-8 md:px-10 pt-6 pb-8 rounded-b-2xl relative">
+                <div className="bg-white px-5 md:px-10 pt-6 pb-8 rounded-b-2xl relative">
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {/* Trip Type */}
-                        <div className="flex items-center gap-8 text-gray-800 text-sm font-semibold">
+                        <div className="flex items-center justify-center md:justify-start gap-6 md:gap-8 text-gray-800 text-sm font-semibold overflow-x-auto no-scrollbar pb-1">
                             {['round', 'oneway'].map((type) => (
-                                <label key={type} className="flex items-center gap-3 cursor-pointer group">
-                                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${tripType === type ? 'border-[#f6405f]' : 'border-gray-300 group-hover:border-gray-400'}`}>
-                                        {tripType === type && <div className="w-2 h-2 bg-[#f6405f] rounded-full"></div>}
+                                <label key={type} className="flex items-center gap-2 md:gap-3 cursor-pointer group shrink-0">
+                                    <div className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center transition-all ${tripType === type ? 'border-[#f6405f]' : 'border-gray-300 group-hover:border-gray-400'}`}>
+                                        {tripType === type && <div className="w-1.5 h-1.5 bg-[#f6405f] rounded-full"></div>}
                                     </div>
                                     <input type="radio" className="hidden" checked={tripType === type} onChange={() => setTripType(type)} />
-                                    <span className="uppercase tracking-wide text-xs">{type === 'round' ? 'Round Trip' : 'One Way'}</span>
+                                    <span className="uppercase tracking-wide text-[10px] md:text-xs">{type === 'round' ? 'Round Trip' : 'One Way'}</span>
                                 </label>
                             ))}
                         </div>
 
                         {/* Inputs Row 1 */}
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
                             <div className="relative">
                                 <InputField
                                     icon={<FaMapMarkerAlt />}
-                                    placeholder="FROM:  Origin (e.g. DEL)"
+                                    placeholder="FROM: Origin"
                                     name="origin"
                                     value={flightParams.origin}
                                     onChange={handleFlightChange}
@@ -186,7 +186,7 @@ export default function SearchForm({ onResults, onSearchStart, onError, autoSear
                             <div className="relative">
                                 <InputField
                                     icon={<FaMapMarkerAlt />}
-                                    placeholder="TO:  Destination (e.g. BOM)"
+                                    placeholder="TO: Destination"
                                     name="destination"
                                     value={flightParams.destination}
                                     onChange={handleFlightChange}
@@ -197,7 +197,7 @@ export default function SearchForm({ onResults, onSearchStart, onError, autoSear
                             <div className="relative" ref={departureRef}>
                                 <div
                                     onClick={() => setShowDeparturePicker(!showDeparturePicker)}
-                                    className="w-full pl-12 pr-4 py-3 bg-white text-gray-800 border border-gray-200 rounded-md text-sm cursor-pointer flex items-center justify-between"
+                                    className="w-full pl-10 md:pl-12 pr-4 py-3 md:py-4 bg-white text-gray-800 border border-gray-200 rounded-md text-xs md:text-sm cursor-pointer flex items-center justify-between shadow-lg"
                                 >
                                     <div className="flex items-center gap-3">
                                         <FaCalendarAlt className="text-gray-400" />
@@ -217,7 +217,7 @@ export default function SearchForm({ onResults, onSearchStart, onError, autoSear
                             <div className="relative" ref={returnRef}>
                                 <div
                                     onClick={() => tripType === 'round' && setShowReturnPicker(!showReturnPicker)}
-                                    className={`w-full pl-12 pr-4 py-3 bg-white text-gray-800 border border-gray-200 rounded-md text-sm flex items-center justify-between ${tripType === 'oneway' ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
+                                    className={`w-full pl-10 md:pl-12 pr-4 py-3 md:py-4 bg-white text-gray-800 border border-gray-200 rounded-md text-xs md:text-sm flex items-center justify-between shadow-lg ${tripType === 'oneway' ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
                                 >
                                     <div className="flex items-center gap-3">
                                         <FaCalendarAlt className="text-gray-400" />
@@ -237,7 +237,7 @@ export default function SearchForm({ onResults, onSearchStart, onError, autoSear
                         </div>
 
                         {/* Inputs Row 2: Selectors */}
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                             <SelectField name="adults" icon={<FaUserFriends />} label="Adult" value={flightParams.adults} onChange={handleFlightChange} options={[1, 2, 3, 4, 5, 6, 7, 8, 9]} />
                             <SelectField name="children" icon={<FaUserFriends />} label="Children" value={flightParams.children} onChange={handleFlightChange} options={[0, 1, 2, 3, 4, 5]} />
                             <SelectField name="infant" icon={<FaUserFriends size={12} />} label="Infants" value={flightParams.infant} onChange={handleFlightChange} options={[0, 1, 2]} />
@@ -251,15 +251,15 @@ export default function SearchForm({ onResults, onSearchStart, onError, autoSear
                             <input name="phone" value={flightParams.phone} onChange={handleFlightChange} />
                         </div>
 
-                        <div className="flex justify-end pt-2">
+                        <div className="flex justify-end pt-4">
                             <button
                                 id="search-submit-btn"
                                 type="submit"
                                 disabled={loading || !isFormValid}
-                                className={`px-10 py-3 rounded-full text-sm font-semibold uppercase tracking-wide shadow-md 
+                                className={`w-full md:w-auto px-10 py-3 md:py-4 rounded-full text-xs md:text-sm font-black uppercase tracking-[0.2em] shadow-xl transition-all
                                     ${loading || !isFormValid
                                         ? "bg-gray-300 cursor-not-allowed text-gray-500"
-                                        : "bg-[#f6405f] hover:bg-[#e33455] text-white"
+                                        : "bg-[#f6405f] hover:bg-black hover:scale-105 text-white shadow-red-500/20"
                                     }`}
                             >
                                 {loading ? "Searching..." : "Find a Deal"}
@@ -359,7 +359,7 @@ function CalendarOverlay({ onSelect, selected, minDate, onClose }: { onSelect: (
     };
 
     return (
-        <div className="absolute top-[calc(100%+12px)] left-0 md:left-auto md:right-0 bg-white shadow-[0_25px_50px_-12px_rgba(0,0,0,0.3)] z-[100] w-[calc(100vw-32px)] sm:w-[380px] border border-gray-100 p-4 sm:p-6 animate-in fade-in slide-in-from-top-4 duration-300 rounded-2xl">
+        <div className="absolute top-[calc(100%+12px)] left-1/2 -translate-x-1/2 md:left-auto md:right-0 md:translate-x-0 bg-white shadow-[0_25px_50px_-12px_rgba(0,0,0,0.3)] z-[100] w-[calc(100vw-40px)] sm:w-[380px] border border-gray-100 p-4 sm:p-6 animate-in fade-in slide-in-from-top-4 duration-300 rounded-2xl">
             {/* Header */}
             <div className="flex items-center justify-between mb-8">
                 <button type="button" onClick={handlePrevMonth} className="w-10 h-10 flex items-center justify-center hover:bg-gray-100 rounded-full text-gray-400 transition-colors">

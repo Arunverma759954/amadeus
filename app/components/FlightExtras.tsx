@@ -44,38 +44,26 @@ export default function FlightExtras({ flight, initialTab = 'details', onClose }
     return (
         <div className="flex flex-col h-full bg-gray-50/30">
             {/* Tabs */}
-            <div className="flex border-b border-gray-100 bg-white sticky top-0 z-10">
-                <button
-                    onClick={() => setActiveTab('details')}
-                    className={`flex-1 py-4 font-bold text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-colors relative ${activeTab === 'details' ? 'text-[#071C4B] bg-blue-50/50' : 'text-gray-400 hover:text-gray-700'}`}
-                >
-                    <FaPlane /> Flight Details
-                    {activeTab === 'details' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#071C4B]"></div>}
-                </button>
-                <button
-                    onClick={() => setActiveTab('seats')}
-                    className={`flex-1 py-4 font-bold text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-colors relative ${activeTab === 'seats' ? 'text-[#071C4B] bg-blue-50/50' : 'text-gray-400 hover:text-gray-700'
-                        }`}
-                >
-                    <FaChair /> Aircraft Seating
-                    {activeTab === 'seats' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#071C4B]"></div>}
-                </button>
-                <button
-                    onClick={() => setActiveTab('meals')}
-                    className={`flex-1 py-4 font-bold text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-colors relative ${activeTab === 'meals' ? 'text-[#071C4B] bg-blue-50/50' : 'text-gray-400 hover:text-gray-700'
-                        }`}
-                >
-                    <FaUtensils /> Meal Plans
-                    {activeTab === 'meals' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#071C4B]"></div>}
-                </button>
-                <button
-                    onClick={() => setActiveTab('passenger')}
-                    className={`flex-1 py-4 font-bold text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-colors relative ${activeTab === 'passenger' ? 'text-[#071C4B] bg-blue-50/50' : 'text-gray-400 hover:text-gray-700'
-                        }`}
-                >
-                    <FaUser /> Passenger
-                    {activeTab === 'passenger' && <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#071C4B]"></div>}
-                </button>
+            <div className="flex border-b border-gray-100 bg-white sticky top-0 z-10 overflow-x-auto no-scrollbar scroll-smooth">
+                <div className="flex min-w-max w-full">
+                    {[
+                        { id: 'details', icon: <FaPlane />, label: 'Flight' },
+                        { id: 'seats', icon: <FaChair />, label: 'Seats' },
+                        { id: 'meals', icon: <FaUtensils />, label: 'Meals' },
+                        { id: 'passenger', icon: <FaUser />, label: 'Traveler' }
+                    ].map((tab) => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id as any)}
+                            className={`flex-1 min-w-[80px] py-3.5 md:py-4 font-black text-[9px] md:text-[10px] uppercase tracking-widest flex items-center justify-center gap-1.5 md:gap-2 transition-all relative
+                                ${activeTab === tab.id ? 'text-[#071C4B] bg-blue-50/50' : 'text-gray-400 hover:text-gray-700'}
+                            `}
+                        >
+                            {tab.icon} <span className="whitespace-nowrap">{tab.label}</span>
+                            {activeTab === tab.id && <div className="absolute bottom-0 left-0 right-0 h-1 bg-[#071C4B]"></div>}
+                        </button>
+                    ))}
+                </div>
             </div>
 
             {/* Content */}

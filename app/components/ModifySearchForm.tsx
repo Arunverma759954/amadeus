@@ -76,13 +76,13 @@ export default function ModifySearchForm({ onResults, onSearchStart, onError, in
         <div className="w-full bg-white font-sans">
             <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Trip Type & Markup Display */}
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-0">
                     <div className="flex items-center gap-2">
                         <div className="relative inline-block">
                             <select
                                 value={tripType}
                                 onChange={(e) => setTripType(e.target.value)}
-                                className="appearance-none bg-transparent pr-8 pl-0 py-1 text-sm font-bold text-[#071C4B] outline-none cursor-pointer border-none"
+                                className="appearance-none bg-transparent pr-8 pl-0 py-1 text-sm font-bold text-[#071C4B] outline-none cursor-pointer border-none uppercase tracking-tighter"
                             >
                                 <option value="round">Round Trip</option>
                                 <option value="oneway">One Way</option>
@@ -93,7 +93,7 @@ export default function ModifySearchForm({ onResults, onSearchStart, onError, in
 
                     {markup !== undefined && (
                         <div className="flex items-center gap-3">
-                            <div className="flex flex-col text-right">
+                            <div className="flex flex-row md:flex-col items-center md:items-end gap-3 md:gap-0 text-right">
                                 <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Pricing Control</span>
                                 <div className="flex items-center gap-2">
                                     <span className="text-xs font-black text-[#071C4B]">Markup: {markup}%</span>
@@ -108,94 +108,107 @@ export default function ModifySearchForm({ onResults, onSearchStart, onError, in
                 </div>
 
                 {/* Main Horizontal Inputs */}
-                <div className="flex flex-wrap lg:flex-nowrap items-center gap-2">
+                {/* Main Horizontal Inputs */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:items-center gap-3 lg:gap-2">
                     {/* From */}
-                    <div className="flex-1 min-w-[200px] relative border border-gray-300 rounded-lg p-3 flex items-center gap-3">
-                        <FaPlane className="text-gray-400 rotate-90" />
-                        <div className="flex-1">
-                            <label className="block text-[10px] text-gray-400 font-semibold leading-none mb-1">Flying From</label>
+                    <div className="relative border border-gray-300 rounded-lg p-2.5 flex items-center gap-2 group hover:border-[#f6405f] transition-all lg:w-[18%]">
+                        <FaPlane className="text-gray-400 rotate-90 shrink-0 text-xs" />
+                        <div className="flex-1 min-w-0">
+                            <label className="block text-[8px] text-gray-400 font-bold leading-none mb-0.5 uppercase tracking-tighter">Flying From</label>
                             <input
                                 type="text"
                                 name="origin"
                                 value={params.origin}
                                 onChange={handleChange}
-                                className="w-full bg-transparent border-none outline-none text-sm font-bold text-[#071C4B] p-0"
+                                className="w-full bg-transparent border-none outline-none text-[11px] font-black text-[#071C4B] p-0"
                                 placeholder="Origin"
                             />
                         </div>
+                        {/* Mobile Swap - Visible only on mobile/tablet between inputs */}
+                        <div className="lg:hidden absolute -bottom-4 right-6 z-20">
+                            <button
+                                type="button"
+                                onClick={handleSwap}
+                                className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 hover:text-[#f6405f] hover:bg-white transition-all bg-white shadow-md active:scale-90"
+                            >
+                                <FaExchangeAlt size={10} className="rotate-90" />
+                            </button>
+                        </div>
                     </div>
 
-                    {/* Swap Button */}
-                    <button
-                        type="button"
-                        onClick={handleSwap}
-                        className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-gray-50 transition-all -mx-1 z-10 bg-white"
-                    >
-                        <FaExchangeAlt />
-                    </button>
+                    {/* Desktop Swap Button */}
+                    <div className="hidden lg:flex items-center justify-center -mx-4 z-10 shrink-0">
+                        <button
+                            type="button"
+                            onClick={handleSwap}
+                            className="w-7 h-7 rounded-full border border-gray-100 flex items-center justify-center text-gray-400 hover:bg-gray-50 transition-all bg-white shadow-sm"
+                        >
+                            <FaExchangeAlt size={10} />
+                        </button>
+                    </div>
 
                     {/* To */}
-                    <div className="flex-1 min-w-[200px] relative border border-gray-300 rounded-lg p-3 flex items-center gap-3">
-                        <FaMapMarkerAlt className="text-gray-400" />
-                        <div className="flex-1">
-                            <label className="block text-[10px] text-gray-400 font-semibold leading-none mb-1">Flying To</label>
+                    <div className="relative border border-gray-300 rounded-lg p-2.5 flex items-center gap-2 group hover:border-[#f6405f] transition-all lg:w-[18%]">
+                        <FaMapMarkerAlt className="text-gray-400 shrink-0 text-xs" />
+                        <div className="flex-1 min-w-0">
+                            <label className="block text-[8px] text-gray-400 font-bold leading-none mb-0.5 uppercase tracking-tighter">Flying To</label>
                             <input
                                 type="text"
                                 name="destination"
                                 value={params.destination}
                                 onChange={handleChange}
-                                className="w-full bg-transparent border-none outline-none text-sm font-bold text-[#071C4B] p-0"
+                                className="w-full bg-transparent border-none outline-none text-[11px] font-black text-[#071C4B] p-0"
                                 placeholder="Destination"
                             />
                         </div>
                     </div>
 
                     {/* Depart Date */}
-                    <div className="flex-1 min-w-[150px] relative border border-gray-300 rounded-lg p-3 flex items-center gap-3">
-                        <FaCalendarAlt className="text-gray-400" />
-                        <div className="flex-1">
-                            <label className="block text-[10px] text-gray-400 font-semibold leading-none mb-1">Depart Date</label>
+                    <div className="relative border border-gray-300 rounded-lg p-2.5 flex items-center gap-2 group hover:border-[#f6405f] transition-all lg:w-[15%]">
+                        <FaCalendarAlt className="text-gray-400 shrink-0 hidden xl:block text-xs" />
+                        <div className="flex-1 min-w-0">
+                            <label className="block text-[8px] text-gray-400 font-bold leading-none mb-0.5 uppercase tracking-tighter">Depart</label>
                             <input
                                 type="date"
                                 name="departureDate"
                                 value={params.departureDate}
                                 onChange={handleChange}
-                                className="w-full bg-transparent border-none outline-none text-sm font-bold text-[#071C4B] p-0"
+                                className="w-full bg-transparent border-none outline-none text-[10px] font-black text-[#071C4B] p-0"
                             />
                         </div>
                     </div>
 
                     {/* Return Date */}
-                    <div className={`flex-1 min-w-[150px] relative border border-gray-300 rounded-lg p-3 flex items-center gap-3 ${tripType === 'oneway' ? 'opacity-50 grayscale' : ''}`}>
-                        <FaCalendarAlt className="text-gray-400" />
-                        <div className="flex-1">
-                            <label className="block text-[10px] text-gray-400 font-semibold leading-none mb-1">Return Date</label>
+                    <div className={`relative border border-gray-300 rounded-lg p-2.5 flex items-center gap-2 group hover:border-[#f6405f] transition-all lg:w-[15%] ${tripType === 'oneway' ? 'opacity-50 grayscale' : ''}`}>
+                        <FaCalendarAlt className="text-gray-400 shrink-0 hidden xl:block text-xs" />
+                        <div className="flex-1 min-w-0">
+                            <label className="block text-[8px] text-gray-400 font-bold leading-none mb-0.5 uppercase tracking-tighter">Return</label>
                             <input
                                 type="date"
                                 name="returnDate"
                                 value={params.returnDate}
                                 onChange={handleChange}
                                 disabled={tripType === 'oneway'}
-                                className="w-full bg-transparent border-none outline-none text-sm font-bold text-[#071C4B] p-0"
+                                className="w-full bg-transparent border-none outline-none text-[10px] font-black text-[#071C4B] p-0 cursor-pointer"
                             />
                         </div>
                     </div>
 
                     {/* Travellers & Class */}
-                    <div className="flex-1 min-w-[220px] relative border border-gray-300 rounded-lg p-3 flex items-center gap-3 group" ref={travellerRef}>
-                        <FaUserFriends className="text-gray-400" />
-                        <div className="flex-1" onClick={() => setShowTravellerPicker(!showTravellerPicker)}>
-                            <label className="block text-[10px] text-gray-400 font-semibold leading-none mb-1">Travellers & Class</label>
-                            <div className="flex items-center justify-between cursor-pointer">
-                                <span className="text-sm font-bold text-[#071C4B] truncate">
-                                    {params.adults + params.children + params.infant} Travellers, {params.cabin}
+                    <div className="relative border border-gray-300 rounded-lg p-2.5 flex items-center gap-2 group hover:border-[#f6405f] transition-all lg:w-[18%]" ref={travellerRef}>
+                        <FaUserFriends className="text-gray-400 shrink-0 text-xs" />
+                        <div className="flex-1 min-w-0 cursor-pointer" onClick={() => setShowTravellerPicker(!showTravellerPicker)}>
+                            <label className="block text-[8px] text-gray-400 font-bold leading-none mb-0.5 uppercase tracking-tighter">Travellers</label>
+                            <div className="flex items-center justify-between">
+                                <span className="text-[10px] font-black text-[#071C4B] truncate">
+                                    {params.adults + params.children} Pax, {params.cabin.charAt(0)}
                                 </span>
-                                <FaChevronDown className="text-[10px] text-gray-300" />
+                                <FaChevronDown className="text-[8px] text-gray-300" />
                             </div>
                         </div>
 
                         {showTravellerPicker && (
-                            <div className="absolute top-[calc(100%+8px)] left-0 w-80 bg-white shadow-2xl rounded-2xl p-6 z-[100] border border-gray-100 animate-in fade-in slide-in-from-top-2 duration-200">
+                            <div className="absolute top-[calc(100%+12px)] right-0 left-0 sm:left-auto w-auto sm:w-80 bg-white shadow-2xl rounded-2xl p-6 z-[100] border border-gray-100 animate-in fade-in slide-in-from-top-2 duration-200">
                                 <div className="space-y-4">
                                     {[
                                         { key: 'adults', label: 'Adults', sub: '12+ years' },
@@ -229,7 +242,7 @@ export default function ModifySearchForm({ onResults, onSearchStart, onError, in
                                             name="cabin"
                                             value={params.cabin}
                                             onChange={handleChange}
-                                            className="w-full bg-gray-50 border-none outline-none rounded-lg p-2 text-sm font-bold text-[#071C4B]"
+                                            className="w-full bg-gray-50 border-none outline-none rounded-lg p-2 text-sm font-bold text-[#071C4B] cursor-pointer"
                                         >
                                             <option>Economy</option>
                                             <option>Premium Economy</option>
@@ -241,7 +254,7 @@ export default function ModifySearchForm({ onResults, onSearchStart, onError, in
                                     <button
                                         type="button"
                                         onClick={() => setShowTravellerPicker(false)}
-                                        className="w-full bg-[#071C4B] text-white py-3 rounded-xl text-xs font-black uppercase tracking-widest mt-2"
+                                        className="w-full bg-[#071C4B] text-white py-3 rounded-xl text-xs font-black uppercase tracking-widest mt-2 hover:bg-[#f6405f] transition-all"
                                     >Done</button>
                                 </div>
                             </div>
@@ -249,13 +262,15 @@ export default function ModifySearchForm({ onResults, onSearchStart, onError, in
                     </div>
 
                     {/* Search Button */}
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="bg-[#f6405f] text-white hover:bg-black transition-all px-10 py-4 rounded-lg font-black text-sm uppercase tracking-widest flex items-center justify-center min-w-[140px] shadow-lg shadow-red-900/10"
-                    >
-                        {loading ? "..." : "Search"}
-                    </button>
+                    <div className="sm:col-span-2 lg:flex-1">
+                        <button
+                            type="submit"
+                            disabled={loading}
+                            className="w-full bg-[#f6405f] text-white hover:bg-black transition-all py-3.5 px-4 rounded-lg font-black text-[11px] uppercase tracking-widest flex items-center justify-center shadow-lg shadow-red-900/10 h-full min-h-[48px]"
+                        >
+                            {loading ? "..." : <><FaSearch className="mr-2 shrink-0 text-xs" /> Search</>}
+                        </button>
+                    </div>
                 </div>
             </form>
         </div>

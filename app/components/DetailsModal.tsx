@@ -11,8 +11,8 @@ interface DetailsModalProps {
 
 export default function DetailsModal({ flight, onClose, initialTab = 'seats' }: DetailsModalProps) {
     return (
-        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-fade-in">
-            <div className="bg-white rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
+        <div className="fixed inset-0 bg-black/60 z-[2100] flex items-center justify-center p-0 md:p-4 backdrop-blur-sm animate-fade-in">
+            <div className="bg-white md:rounded-2xl w-full h-full md:h-auto md:max-w-4xl md:max-h-[90vh] overflow-hidden flex flex-col shadow-2xl">
 
                 {/* Header */}
                 <div className="p-6 border-b border-gray-100 flex justify-between items-center bg-gray-50">
