@@ -31,6 +31,7 @@ export interface FlightOffer {
     itineraries: FlightItinerary[];
     price: FlightPrice;
     validatingAirlineCodes: string[];
+    travelerPricings?: any[];
 }
 
 interface FlightCardProps {

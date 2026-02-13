@@ -475,22 +475,20 @@ export default function Home() {
                                             const originalPrice = parseFloat(item.price.total);
                                             const adjustedPrice = originalPrice * (1 + (pricingAdjustment / 100));
 
-                                            const adjustedOffer = {
+                                            const adjustedOffer: FlightOffer & { basePrice?: number; adjustment?: number } = {
                                                 ...item,
                                                 price: {
                                                     ...item.price,
                                                     total: adjustedPrice.toString()
-                                                }
+                                                },
+                                                basePrice: originalPrice,
+                                                adjustment: pricingAdjustment
                                             };
 
                                             return (
                                                 <FlightCard
                                                     key={index}
-                                                    offer={{
-                                                        ...adjustedOffer,
-                                                        basePrice: originalPrice,
-                                                        adjustment: pricingAdjustment
-                                                    } as any}
+                                                    offer={adjustedOffer}
                                                     dictionaries={dictionaries}
                                                     onViewDetails={handleBookingClick}
                                                 />
