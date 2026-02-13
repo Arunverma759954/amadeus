@@ -1,0 +1,8 @@
+# Skip admin panel as it has its own config
+admin-panel/
+node_modules/
+.next/
+out/
+build/
+*.txt
+*.log

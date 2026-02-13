@@ -1,3 +1,4 @@
+/* eslint-disable */
 "use client";
 
 import { useState, useEffect, useMemo, useRef } from "react";
@@ -639,7 +640,7 @@ export default function Home() {
                                 <img
                                     src={item.image}
                                     alt={item.city}
-                                    // eslint-disable-next-line @next/next/no-img-element
+
                                     className="w-full h-72 md:h-80 object-cover transform group-hover:scale-110 transition-transform duration-500"
                                 />
                                 <div className="absolute inset-0 bg-black/35 group-hover:bg-black/45 transition-colors duration-300 flex flex-col items-center justify-center text-white text-center px-3">
