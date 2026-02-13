@@ -1,14 +1,15 @@
-import { FaPlane, FaClock } from "react-icons/fa";
-import { MdFlightClass } from "react-icons/md";
+import { FaClock, FaChevronDown } from "react-icons/fa";
 
 interface FlightSegment {
     departure: {
         iataCode: string;
         at: string;
+        terminal?: string;
     };
     arrival: {
         iataCode: string;
         at: string;
+        terminal?: string;
     };
     carrierCode: string;
     number: string;
@@ -35,7 +36,7 @@ export interface FlightOffer {
 interface FlightCardProps {
     offer: FlightOffer;
     dictionaries?: any;
-    onViewDetails: (offer: FlightOffer, tab: 'seats' | 'meals') => void;
+    onViewDetails: (offer: FlightOffer, tab: 'details' | 'seats' | 'meals') => void;
 }
 
 export default function FlightCard({ offer, dictionaries, onViewDetails }: FlightCardProps) {
@@ -47,89 +48,102 @@ export default function FlightCard({ offer, dictionaries, onViewDetails }: Fligh
     const carrierCode = offer.validatingAirlineCodes?.[0] || firstSegment.carrierCode;
     const carrierName = dictionaries?.carriers?.[carrierCode] || `${carrierCode} Airlines`;
 
-    // Format time (e.g. 10:30 AM)
     const formatTime = (dateString: string) => {
         return new Date(dateString).toLocaleTimeString([], {
             hour: '2-digit',
             minute: '2-digit',
+            hour12: false
         });
     };
 
-    // Format duration (PT2H30M -> 2h 30m) - Simple parser for display
     const formatDuration = (isoDuration: string) => {
-        return isoDuration.replace("PT", "").toLowerCase();
+        return isoDuration.replace("PT", "").toLowerCase().replace("h", "h ").replace("m", "m");
     };
 
+    const basePrice = parseFloat(offer.price.total);
+
     return (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200 p-5 flex flex-col md:flex-row justify-between items-center gap-6 group">
-
-            {/* Flight Info */}
-            <div className="flex-1 w-full">
-                <div className="flex items-center gap-4 mb-4">
-                    <div className="bg-blue-50 p-3 rounded-full text-blue-600 group-hover:bg-blue-100 transition-colors">
-                        <FaPlane className="text-xl" />
-                    </div>
-                    <div>
-                        <h3 className="font-bold text-lg text-gray-800">{carrierName}</h3>
-                        <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
-                            Flight {firstSegment.carrierCode} {firstSegment.number}
-                        </span>
-                    </div>
-                </div>
-
-                <div className="flex items-center justify-between text-gray-700">
+        <div className="bg-white border border-gray-200 shadow-sm overflow-hidden flex flex-col md:flex-row mb-4">
+            {/* Left: Flight Details */}
+            <div className="flex-[1.5] p-6 flex flex-col justify-between border-r border-gray-100">
+                <div className="flex items-center justify-between mb-8">
                     {/* Departure */}
-                    <div className="text-center">
-                        <div className="text-2xl font-bold text-gray-900">{formatTime(firstSegment.departure.at)}</div>
-                        <div className="text-sm font-medium text-gray-500">{firstSegment.departure.iataCode}</div>
+                    <div className="flex flex-col">
+                        <span className="text-2xl font-bold text-[#071C4B]">{formatTime(firstSegment.departure.at)}</span>
+                        <span className="text-xs font-bold text-gray-400 uppercase">{firstSegment.departure.iataCode}</span>
+                        <span className="text-[10px] text-gray-400 mt-1">Terminal {firstSegment.departure.terminal || '1'}</span>
                     </div>
 
-                    {/* Dotted Line / Duration */}
-                    <div className="flex-1 px-4 flex flex-col items-center">
-                        <span className="text-xs text-gray-400 mb-1 flex items-center gap-1">
-                            <FaClock size={10} /> {formatDuration(itinerary.duration)}
-                        </span>
-                        <div className="w-full h-px bg-gray-300 relative group-hover:bg-blue-200 transition-colors">
-                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-gray-300 rounded-full group-hover:bg-blue-400 transition-colors"></div>
+                    {/* Path */}
+                    <div className="flex-1 px-8 flex flex-col items-center relative">
+                        <div className="flex items-center gap-2 mb-1">
+                            <span className="text-[10px] font-bold text-gray-400">{formatDuration(itinerary.duration)}</span>
+                            <span className="text-[10px] font-bold text-gray-400 uppercase">{firstSegment.carrierCode}</span>
                         </div>
-                        <span className="text-xs text-gray-400 mt-1">
-                            {itinerary.segments.length > 1 ? `${itinerary.segments.length - 1} Stop(s)` : "Direct"}
-                        </span>
+                        <div className="w-full h-px bg-gray-300 relative">
+                            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 bg-gray-400 rounded-full"></div>
+                        </div>
                     </div>
 
                     {/* Arrival */}
-                    <div className="text-center">
-                        <div className="text-2xl font-bold text-gray-900">{formatTime(lastSegment.arrival.at)}</div>
-                        <div className="text-sm font-medium text-gray-500">{lastSegment.arrival.iataCode}</div>
+                    <div className="flex flex-col text-right">
+                        <span className="text-2xl font-bold text-[#071C4B]">{formatTime(lastSegment.arrival.at)}</span>
+                        <span className="text-xs font-bold text-gray-400 uppercase">{lastSegment.arrival.iataCode}</span>
+                        <span className="text-[10px] text-gray-400 mt-1">Terminal {lastSegment.arrival.terminal || '1'}</span>
+                    </div>
+                </div>
+
+                <div className="space-y-1.5">
+                    <div className="flex items-center gap-1.5 text-[10px] text-gray-500 font-bold">
+                        <FaClock size={10} />
+                        <span>Duration {formatDuration(itinerary.duration)}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[10px] text-gray-500 font-bold">
+                        <span>✓</span>
+                        <span>Operated by {carrierName}</span>
+                    </div>
+                    <div
+                        onClick={() => onViewDetails(offer, 'details')}
+                        className="text-[10px] text-blue-600 font-bold cursor-pointer hover:underline mt-2"
+                    >
+                        + See itinerary details
                     </div>
                 </div>
             </div>
 
-            {/* Price & Action */}
-            <div className="flex flex-row md:flex-col items-end justify-between w-full md:w-auto gap-4 md:border-l md:pl-6 border-gray-100 min-w-[140px]">
-                <div className="text-right w-full md:w-auto">
-                    <div className="text-xs text-gray-400">Total Price</div>
-                    <div className="text-2xl font-extrabold text-blue-600">
-                        {offer.price.currency} {offer.price.total}
-                    </div>
-                </div>
+            {/* Right: Price & Action */}
+            <div className="flex-1 flex flex-col bg-[#F8F9FA] p-6 justify-center items-center border-l border-gray-100">
+                <span className="text-[10px] font-bold text-gray-400 uppercase mb-1">Total Price</span>
 
-                <div className="flex flex-col w-full gap-2">
-                    <button
-                        onClick={() => onViewDetails(offer, 'seats')}
-                        className="w-full px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-all shadow-sm active:translate-y-0.5"
-                    >
-                        Select Flight
-                    </button>
-                    <button
-                        onClick={() => onViewDetails(offer, 'meals')}
-                        className="w-full px-4 py-2 bg-white border border-blue-200 text-blue-600 font-semibold rounded-lg hover:bg-blue-50 transition-all text-sm flex items-center justify-center gap-2"
-                    >
-                        <MdFlightClass /> View Extras
-                    </button>
+                {(offer as any).adjustment !== 0 && (offer as any).basePrice && (
+                    <div className="flex flex-col items-center mb-1">
+                        <span className="text-[9px] text-gray-400 font-bold line-through">
+                            {offer.price.currency} {(offer as any).basePrice.toLocaleString('en-IN')}
+                        </span>
+                        <span className={`text-[8px] font-black uppercase ${(offer as any).adjustment < 0 ? 'text-green-600' : 'text-orange-600'}`}>
+                            {(offer as any).adjustment > 0 ? '+' : ''}{(offer as any).adjustment}%
+                            {/* Show the added amount for clarity */}
+                            &nbsp;({offer.price.currency} {(basePrice - (offer as any).basePrice).toLocaleString('en-IN', { maximumFractionDigits: 0 })})
+                        </span>
+                    </div>
+                )}
+
+                <div className="text-2xl font-black text-[#071C4B]">
+                    {offer.price.currency} {basePrice.toLocaleString('en-IN')}
+                </div>
+                <button
+                    onClick={() => onViewDetails(offer, 'details')}
+                    className="mt-4 w-full bg-[#071C4B] text-white font-bold py-3 rounded-lg hover:bg-blue-900 transition-colors shadow-md text-sm uppercase tracking-widest"
+                >
+                    Select Flight
+                </button>
+                <div
+                    onClick={() => onViewDetails(offer, 'seats')}
+                    className="mt-3 text-[10px] font-bold text-blue-600 cursor-pointer hover:underline uppercase tracking-tighter"
+                >
+                    + View extras (bags, seats)
                 </div>
             </div>
-
         </div>
     );
 }

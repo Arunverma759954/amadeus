@@ -8,15 +8,26 @@ export interface FlightSearchParams {
     adults: number;
 }
 
+import { supabase } from "@/src/lib/supabase";
+
 export const searchFlights = async (params: FlightSearchParams) => {
     try {
-        const response = await apiClient.post("/flights/search", params);
-        return response.data;
-    } catch (error) {
-        if (error instanceof AxiosError) {
-            throw new Error(error.response?.data?.message || error.message || "Failed to search flights");
+        console.log("🚀 [FLIGHT SEARCH] Invoking Edge Function:", params);
+
+        const { data, error } = await supabase.functions.invoke('search-flights', {
+            body: params
+        });
+
+        if (error) {
+            console.error("❌ [EDGE FUNCTION ERROR]", error);
+            throw new Error(error.message || "Edge Function failed");
         }
-        throw new Error("An unexpected error occurred");
+
+        console.log("✅ [FLIGHT SEARCH] Results received:", data?.data?.length || 0);
+        return data;
+    } catch (error: any) {
+        console.error("❌ [FLIGHT SEARCH] Error:", error);
+        throw new Error(error.message || "Failed to search flights");
     }
 };
 

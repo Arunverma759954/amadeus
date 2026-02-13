@@ -6,7 +6,7 @@ import FlightExtras from "./FlightExtras";
 interface DetailsModalProps {
     flight: any;
     onClose: () => void;
-    initialTab?: 'seats' | 'meals';
+    initialTab?: 'details' | 'seats' | 'meals';
 }
 
 export default function DetailsModal({ flight, onClose, initialTab = 'seats' }: DetailsModalProps) {
