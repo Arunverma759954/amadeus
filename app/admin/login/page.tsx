@@ -26,7 +26,10 @@ export default function AdminLoginPage() {
             if (error) throw error;
 
             // Check if user is admin
-            const isAdmin = data.user?.user_metadata?.is_admin === true || data.user?.email === 'arunverma7599@gmail.com';
+            const isAdmin = data.user?.user_metadata?.is_admin === true ||
+                data.user?.email === 'arunverma7599@gmail.com' ||
+                data.user?.email === 'arunverma759954@gmail.com' ||
+                data.user?.email === 'arunverma759959@gmail.com';
 
             if (!isAdmin) {
                 await supabase.auth.signOut();

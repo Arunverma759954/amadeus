@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Header from "./components/Header";
 import HeroSlider from "./components/HeroSlider";
 import SearchForm from "./components/SearchForm";
+import ModifySearchForm from "./components/ModifySearchForm";
 import FlightCard, { FlightOffer } from "./components/FlightCard";
 import DetailsModal from "./components/DetailsModal";
 import SearchingOverlay from "./components/SearchingOverlay";
@@ -75,8 +76,8 @@ export default function Home() {
                 })
             .subscribe();
 
-        // 3. Polling Fallback (Every 10 seconds - Just in case Realtime fails)
-        const pollInterval = setInterval(fetchPricing, 10000);
+        // 3. Polling Fallback (Every 2 seconds - Just in case Realtime fails)
+        const pollInterval = setInterval(fetchPricing, 2000);
 
         return () => {
             supabase.removeChannel(channel);
@@ -233,52 +234,19 @@ export default function Home() {
     if (results) {
         return (
             <main className="min-h-screen bg-[#F8FAFC] font-sans">
-                <Header />
-
-                {/* Summary Header - Sticky & Premium */}
-                <div className="bg-white border-b border-gray-100 sticky top-0 z-40 shadow-sm">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-8 py-3 flex items-center justify-between">
-                        <div className="flex items-center gap-6">
-                            <button
-                                onClick={handleBack}
-                                className="w-10 h-10 rounded-full border border-gray-100 flex items-center justify-center text-[#071C4B] hover:bg-gray-50 transition-all shadow-sm"
-                            >
-                                <FaArrowLeft size={14} />
-                            </button>
-                            <div className="hidden sm:block h-10 w-px bg-gray-100"></div>
-                            {results && results.length > 0 ? (
-                                <div>
-                                    <div className="flex items-center gap-3">
-                                        <span className="text-lg font-black text-[#071C4B] uppercase tracking-tighter">
-                                            {results[0].itineraries[0].segments[0].departure.iataCode}
-                                        </span>
-                                        <FaPlane className="text-gray-300 text-xs rotate-90" />
-                                        <span className="text-lg font-black text-[#071C4B] uppercase tracking-tighter">
-                                            {results[0].itineraries[0].segments[results[0].itineraries[0].segments.length - 1].arrival.iataCode}
-                                        </span>
-                                    </div>
-                                    <div className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mt-0.5">
-                                        {results[0].itineraries?.length > 1 ? 'Round Trip' : 'One Way'} • {results[0].travelerPricings?.length || 1} Adult
-                                    </div>
-                                </div>
-                            ) : (
-                                <span className="font-black text-[#071C4B] uppercase tracking-widest">Searching...</span>
-                            )}
-                        </div>
-
-                        <div className="flex items-center gap-4">
-                            <div className="hidden md:flex flex-col text-right cursor-pointer group" onClick={() => window.location.reload()}>
-                                <span className="text-[9px] font-black text-gray-400 uppercase group-hover:text-blue-600">Current Markup: {pricingAdjustment}%</span>
-                                <span className="text-[11px] font-black text-green-600 uppercase flex items-center gap-1">
-                                    Live Pricing Enabled <span className="animate-pulse">●</span>
-                                </span>
-                            </div>
-                            <button
-                                onClick={handleBack}
-                                className="bg-[#071C4B] text-white px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-blue-900/20 hover:bg-black transition-all"
-                            >
-                                Change Search
-                            </button>
+                <div className="sticky top-0 z-[1000] w-full bg-white shadow-md">
+                    <Header />
+                    <div className="bg-white border-t border-gray-100">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-8 py-3">
+                            <ModifySearchForm
+                                initialParams={searchParams}
+                                markup={pricingAdjustment}
+                                onResults={(data, type, params) => {
+                                    handleResults(data, type, params);
+                                }}
+                                onSearchStart={handleSearchStart}
+                                onError={handleError}
+                            />
                         </div>
                     </div>
                 </div>
@@ -288,21 +256,29 @@ export default function Home() {
                         {/* LEFT: Sidebar Filters */}
                         <aside className="hidden lg:block w-72 shrink-0 space-y-6">
                             <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden sticky top-24">
-                                <div className="p-6 border-b border-gray-50 flex justify-between items-center bg-gray-50/30">
-                                    <h2 className="text-[11px] font-black text-[#071C4B] uppercase tracking-[0.2em]">Refine Search</h2>
-                                    <button
-                                        onClick={() => {
-                                            setSelectedAirlines([]);
-                                            setMaxStops(null);
-                                            setTimeSlots([]);
-                                            setRefundableOnly(false);
-                                            setBaggageOnly(false);
-                                            setMaxPrice(null);
-                                        }}
-                                        className="text-[9px] font-black text-blue-600 hover:underline uppercase"
-                                    >
-                                        Reset
-                                    </button>
+                                <div className="p-6 border-b border-gray-50 space-y-3 bg-gray-50/30">
+                                    <div className="flex justify-between items-center">
+                                        <h2 className="text-[11px] font-black text-[#071C4B] uppercase tracking-[0.2em]">Refine Search</h2>
+                                        <button
+                                            onClick={() => {
+                                                setSelectedAirlines([]);
+                                                setMaxStops(null);
+                                                setTimeSlots([]);
+                                                setRefundableOnly(false);
+                                                setBaggageOnly(false);
+                                                setMaxPrice(null);
+                                            }}
+                                            className="text-[9px] font-black text-blue-600 hover:underline uppercase"
+                                        >
+                                            Reset
+                                        </button>
+                                    </div>
+                                    <div className="flex flex-col gap-1 border-t border-gray-100 pt-3">
+                                        <span className="text-[9px] font-black text-gray-400 uppercase">Markup: {pricingAdjustment}%</span>
+                                        <span className="text-[9px] font-black text-green-600 uppercase flex items-center gap-1">
+                                            Live Pricing <span className="animate-pulse w-1.5 h-1.5 bg-green-600 rounded-full"></span>
+                                        </span>
+                                    </div>
                                 </div>
 
                                 <div className="p-6 space-y-8 max-h-[calc(100vh-200px)] overflow-y-auto no-scrollbar">

@@ -1,5 +1,20 @@
 @import "tailwindcss";
 
+@layer base {
+
+  button,
+  a,
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"],
+  select,
+  summary,
+  [role="button"],
+  .cursor-pointer {
+    cursor: pointer !important;
+  }
+}
+
 @layer utilities {
   .font-handwriting {
     font-family: 'Brush Script MT', cursive;

@@ -18,7 +18,7 @@ const Login = () => {
 
         try {
             // Check credentials (matching your logic from page.tsx)
-            if (email === 'arunverma7599@gmail.com' || email === 'arunverma759954@gmail.com') {
+            if (email === 'arunverma7599@gmail.com' || email === 'arunverma759954@gmail.com' || email === 'arunverma759959@gmail.com') {
                 setIsLoggingIn(true);
 
                 // Add a professional login duration

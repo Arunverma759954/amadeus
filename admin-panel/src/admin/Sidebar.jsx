@@ -3,10 +3,11 @@ import { NavLink } from "react-router-dom";
 export default function Sidebar() {
   const menu = [
     { name: "Dashboard", path: "/admin" },
-    { name: "Flights", path: "/admin/flights" },
-    { name: "Searches", path: "/admin/searches" },
-    { name: "Users", path: "/admin/users" },
+    { name: "Recent Searches", path: "/admin/searches" },
     { name: "Bookings", path: "/admin/bookings" },
+    { name: "Users", path: "/admin/users" },
+    { name: "Content", path: "/admin/content" },
+    { name: "Settings", path: "/admin/settings" },
   ];
 
   return (
