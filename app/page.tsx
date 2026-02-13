@@ -542,6 +542,25 @@ export default function Home() {
                 <HeroSlider />
                 <div className="absolute bottom-0 left-0 right-0 z-[100] translate-y-1/2 flex justify-center px-4">
                     <div className="w-full max-w-7xl">
+                        {/* Action Bar Above Search */}
+                        <div className="w-full flex h-10 md:h-12 overflow-hidden rounded-t-2xl shadow-lg border-x border-t border-white/20">
+                            <div className="flex-1 bg-[#25D366] hover:bg-[#20bd5a] text-white flex items-center justify-center relative cursor-pointer group transition-colors">
+                                <div className="absolute left-4 hidden lg:flex items-center justify-center w-8 h-8 bg-white/20 rounded-full border border-white/30 backdrop-blur-sm">
+                                    <FaCheckCircle className="text-white text-sm" />
+                                </div>
+                                <a href="https://wa.me/61412345678" className="flex items-center gap-2 font-black text-xs md:text-lg uppercase tracking-[0.2em]">
+                                    <FaWhatsapp size={18} />
+                                    WhatsApp
+                                </a>
+                            </div>
+                            <a
+                                href="tel:+61730678999"
+                                className="flex-1 bg-[#C41E22] hover:bg-[#a0181b] text-white flex items-center justify-center gap-2 font-black text-xs md:text-lg uppercase tracking-[0.2em] transition-colors cursor-pointer"
+                            >
+                                <FaPhoneAlt size={16} />
+                                Call Now
+                            </a>
+                        </div>
                         <SearchForm
                             onResults={handleResults}
                             onSearchStart={handleSearchStart}
@@ -988,28 +1007,6 @@ export default function Home() {
                     FAQ&apos;s | Privacy Policy | Terms &amp; Conditions
                 </div>
             </footer>
-
-            {/* Global Sticky WhatsApp / Call Now bar (fixed at bottom) */}
-            <div className="sticky bottom-0 z-[1000]">
-                <div className="w-full flex h-10 md:h-12">
-                    <div className="flex-1 bg-[#25D366] hover:bg-[#20bd5a] text-white flex items-center justify-center relative cursor-pointer group transition-colors">
-                        <div className="absolute left-8 hidden md:flex items-center justify-center w-8 h-8 bg-[#0056b3] rounded-full border-2 border-white shadow-lg">
-                            <FaCheckCircle className="text-white text-sm" />
-                        </div>
-                        <a href="https://wa.me/61412345678" className="flex items-center gap-2 font-bold text-lg md:text-xl uppercase tracking-widest">
-                            <FaWhatsapp size={20} />
-                            WhatsApp
-                        </a>
-                    </div>
-                    <a
-                        href="tel:+61730678999"
-                        className="flex-1 bg-[#C41E22] hover:bg-[#a0181b] text-white flex items-center justify-center gap-2 font-bold text-lg md:text-xl uppercase tracking-widest transition-colors cursor-pointer"
-                    >
-                        <FaPhoneAlt size={18} />
-                        Call Now
-                    </a>
-                </div>
-            </div>
 
             {selectedFlight && (
                 <DetailsModal
