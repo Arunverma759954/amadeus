@@ -471,7 +471,7 @@ export default function Home() {
                                             </button>
                                         </div>
                                     ) : (
-                                        filteredResults.map((item: any, index: number) => {
+                                        filteredResults.map((item: FlightOffer, index: number) => {
                                             const originalPrice = parseFloat(item.price.total);
                                             const adjustedPrice = originalPrice * (1 + (pricingAdjustment / 100));
 
@@ -534,6 +534,7 @@ export default function Home() {
                     {/* Row 1: Image LEFT, Text RIGHT */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-start">
                         <div className="bg-white shadow-[0_10px_30px_rgba(0,0,0,0.12)] p-3">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img src="/10.jpg" alt="Friendly travel assistance" className="w-full h-64 md:h-72 object-cover" />
                         </div>
                         <div className="text-left text-gray-700 text-sm md:text-base leading-relaxed">
@@ -577,6 +578,7 @@ export default function Home() {
                             </p>
                         </div>
                         <div className="bg-white shadow-[0_10px_30px_rgba(0,0,0,0.12)] p-3">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img src="/8.jpg" alt="Best flight service" className="w-full h-64 md:h-72 object-cover" />
                         </div>
                     </div>
@@ -639,6 +641,7 @@ export default function Home() {
                                 <img
                                     src={item.image}
                                     alt={item.city}
+                                    // eslint-disable-next-line @next/next/no-img-element
                                     className="w-full h-72 md:h-80 object-cover transform group-hover:scale-110 transition-transform duration-500"
                                 />
                                 <div className="absolute inset-0 bg-black/35 group-hover:bg-black/45 transition-colors duration-300 flex flex-col items-center justify-center text-white text-center px-3">

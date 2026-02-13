@@ -63,7 +63,7 @@ export default function ModifySearchForm({ onResults, onSearchStart, onError, in
         setLoading(true);
 
         try {
-            const data = await searchFlights(params as any);
+            const data = await searchFlights(params as unknown as FlightSearchParams);
             onResults(data, 'flight', params);
         } catch (err: any) {
             onError(err.message || "Search failed");
@@ -209,13 +209,13 @@ export default function ModifySearchForm({ onResults, onSearchStart, onError, in
                                             <div className="flex items-center gap-4">
                                                 <button
                                                     type="button"
-                                                    onClick={() => setParams(p => ({ ...p, [type.key as any]: Math.max(type.key === 'adults' ? 1 : 0, p[type.key as 'adults' | 'children' | 'infant'] - 1) }))}
+                                                    onClick={() => setParams(p => ({ ...p, [type.key]: Math.max(type.key === 'adults' ? 1 : 0, (p[type.key as keyof typeof p] as number) - 1) }))}
                                                     className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 hover:border-[#f6405f] hover:text-[#f6405f]"
                                                 >-</button>
-                                                <span className="text-sm font-bold w-4 text-center">{params[type.key as 'adults' | 'children' | 'infant']}</span>
+                                                <span className="text-sm font-bold w-4 text-center">{params[type.key as keyof typeof params] as number}</span>
                                                 <button
                                                     type="button"
-                                                    onClick={() => setParams(p => ({ ...p, [type.key as any]: p[type.key as 'adults' | 'children' | 'infant'] + 1 }))}
+                                                    onClick={() => setParams(p => ({ ...p, [type.key]: (p[type.key as keyof typeof p] as number) + 1 }))}
                                                     className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 hover:border-[#f6405f] hover:text-[#f6405f]"
                                                 >+</button>
                                             </div>
