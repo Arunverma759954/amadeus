@@ -1,0 +1,21 @@
+@import "tailwindcss";
+
+@variant dark (&:where(.dark, .dark *));
+
+:root {
+  font-family: 'Satoshi', sans-serif;
+}
+
+@theme {
+  --color-boxdark: #24303F;
+  --color-boxdark-2: #1A222C;
+  --color-bodydark: #AEB7C0;
+  --color-bodydark1: #DEE4EE;
+  --color-bodydark2: #8A99AF;
+  --color-primary: #3C50E0;
+  --color-secondary: #80CAEE;
+  --color-stroke: #E2E8F0;
+  --color-strokedark: #2E3A47;
+  --color-meta-2: #EFF2F7;
+  --color-meta-4: #313D4A;
+}
