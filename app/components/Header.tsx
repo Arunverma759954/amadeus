@@ -61,7 +61,7 @@ export default function Header() {
         <div className="max-w-7xl mx-auto flex justify-between items-center h-16 md:h-20 lg:h-22">
           {/* Logo */}
           <div className="flex items-center">
-            <Link href="/" className="flex flex-col items-start group">
+            <a href="/" className="flex flex-col items-start group">
               <div className="relative w-36 md:w-44 lg:w-48 h-10 md:h-14 lg:h-16 transition-transform duration-500 group-hover:scale-105">
                 <Image
                   src="/logo.png"
@@ -71,7 +71,7 @@ export default function Header() {
                   priority
                 />
               </div>
-            </Link>
+            </a>
           </div>
 
           {/* Mobile Menu Toggle */}
@@ -89,9 +89,9 @@ export default function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-1 font-bold text-[12px] lg:text-[13px]">
-            <Link href="/" className="bg-[#C41E22] text-white px-3 lg:px-5 py-3.5 rounded-none hover:bg-[#A3181C] transition-all uppercase tracking-tight shadow-sm">
+            <a href="/" className="bg-[#C41E22] text-white px-3 lg:px-5 py-3.5 rounded-none hover:bg-[#A3181C] transition-all uppercase tracking-tight shadow-sm">
               Home
-            </Link>
+            </a>
             <Link href="/about" className="px-3 lg:px-5 py-3.5 rounded-none text-[#071C4B] hover:bg-[#C41E22] hover:text-white transition-all whitespace-nowrap uppercase tracking-tight">
               About Us
             </Link>
@@ -136,12 +136,14 @@ export default function Header() {
         {/* Drawer Header */}
         <div className="p-6 flex justify-between items-center border-b border-gray-100 bg-white sticky top-0 z-10">
           <div className="relative w-44 h-12">
-            <Image
-              src="/logo.png"
-              alt="HiFi Travels"
-              fill
-              className="object-contain object-left"
-            />
+            <a href="/" onClick={() => setIsMenuOpen(false)} className="block">
+              <Image
+                src="/logo.png"
+                alt="HiFi Travels"
+                fill
+                className="object-contain object-left cursor-pointer"
+              />
+            </a>
           </div>
           <button onClick={() => setIsMenuOpen(false)} className="text-[#00308F] p-3 bg-gray-50 rounded-full hover:rotate-90 transition-all duration-500">
             <FaTimes size={28} />
@@ -150,7 +152,7 @@ export default function Header() {
 
         {/* Drawer Links */}
         <nav className="flex flex-col py-6 overflow-y-auto bg-white flex-1 relative z-0">
-          <Link href="/" onClick={() => setIsMenuOpen(false)} className="px-8 py-5 text-[#00308F] text-xl font-black border-b border-gray-100 hover:bg-[#C41E22] hover:text-white transition-all uppercase shadow-sm m-2 rounded-xl bg-gray-50">Home</Link>
+          <a href="/" onClick={() => setIsMenuOpen(false)} className="px-8 py-5 text-[#00308F] text-xl font-black border-b border-gray-100 hover:bg-[#C41E22] hover:text-white transition-all uppercase shadow-sm m-2 rounded-xl bg-gray-50">Home</a>
           <Link href="/about" onClick={() => setIsMenuOpen(false)} className="px-8 py-5 text-[#00308F] text-lg font-black border-b border-gray-100 hover:bg-gray-100 transition-all uppercase">About Us</Link>
           <Link href="/deals" onClick={() => setIsMenuOpen(false)} className="px-8 py-5 text-[#00308F] text-lg font-black border-b border-gray-100 hover:bg-gray-100 transition-all uppercase">Deals & Promotions</Link>
           <Link href="/holidays" onClick={() => setIsMenuOpen(false)} className="px-8 py-5 text-[#00308F] text-lg font-black border-b border-gray-100 hover:bg-gray-100 transition-all uppercase">Holidays</Link>

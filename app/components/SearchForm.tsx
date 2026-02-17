@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { searchFlights, FlightSearchParams } from "@/src/lib/flights";
 import { searchHotels, HotelSearchParams } from "@/src/lib/hotels";
 import { FaPlane, FaHotel, FaShieldAlt, FaMapMarkerAlt, FaCalendarAlt, FaUserFriends, FaChevronDown, FaChevronLeft, FaChevronRight, FaWhatsapp, FaPhoneAlt, FaCheckCircle } from "react-icons/fa";
@@ -181,6 +181,7 @@ export default function SearchForm({ onResults, onSearchStart, onError, autoSear
                                         value={flightParams.origin}
                                         onChange={handleFlightChange}
                                         required={!flightParams.origin}
+                                        enableAirportAutocomplete
                                     />
                                 </div>
                                 <div className="relative">
@@ -190,6 +191,7 @@ export default function SearchForm({ onResults, onSearchStart, onError, autoSear
                                         name="destination"
                                         value={flightParams.destination}
                                         onChange={handleFlightChange}
+                                        enableAirportAutocomplete
                                     />
                                 </div>
 
@@ -273,15 +275,239 @@ export default function SearchForm({ onResults, onSearchStart, onError, autoSear
     );
 }
 
-function InputField({ icon, placeholder, name, value, onChange, required }: any) {
+// Lightweight airport suggestion type for inline dropdown
+interface AirportSuggestion {
+    iataCode: string;
+    name: string;
+    cityName: string;
+    countryName: string;
+    countryCode?: string;
+}
+
+// Fallback static list – so dropdown works even if Amadeus API/env not configured
+const STATIC_AIRPORTS: AirportSuggestion[] = [
+    // A – examples
+    { iataCode: "AMD", name: "Sardar Vallabhbhai Patel Intl.", cityName: "Ahmedabad", countryName: "India", countryCode: "IN" },
+    { iataCode: "ATQ", name: "Sri Guru Ram Dass Jee Intl.", cityName: "Amritsar", countryName: "India", countryCode: "IN" },
+    { iataCode: "AUH", name: "Abu Dhabi Intl.", cityName: "Abu Dhabi", countryName: "United Arab Emirates", countryCode: "AE" },
+    { iataCode: "AMS", name: "Schiphol", cityName: "Amsterdam", countryName: "Netherlands", countryCode: "NL" },
+    { iataCode: "ATL", name: "Hartsfield–Jackson", cityName: "Atlanta", countryName: "United States", countryCode: "US" },
+    { iataCode: "AKL", name: "Auckland Intl.", cityName: "Auckland", countryName: "New Zealand", countryCode: "NZ" },
+    // Existing sample network
+    { iataCode: "DEL", name: "Indira Gandhi Intl.", cityName: "Delhi", countryName: "India", countryCode: "IN" },
+    { iataCode: "BOM", name: "Chhatrapati Shivaji Intl.", cityName: "Mumbai", countryName: "India", countryCode: "IN" },
+    { iataCode: "BLR", name: "Kempegowda Intl.", cityName: "Bengaluru", countryName: "India", countryCode: "IN" },
+    { iataCode: "HYD", name: "Rajiv Gandhi Intl.", cityName: "Hyderabad", countryName: "India", countryCode: "IN" },
+    { iataCode: "MAA", name: "Chennai Intl.", cityName: "Chennai", countryName: "India", countryCode: "IN" },
+    { iataCode: "DXB", name: "Dubai Intl.", cityName: "Dubai", countryName: "United Arab Emirates", countryCode: "AE" },
+    { iataCode: "SIN", name: "Changi", cityName: "Singapore", countryName: "Singapore", countryCode: "SG" },
+    { iataCode: "LHR", name: "Heathrow", cityName: "London", countryName: "United Kingdom", countryCode: "GB" },
+    { iataCode: "LGW", name: "Gatwick", cityName: "London", countryName: "United Kingdom", countryCode: "GB" },
+    { iataCode: "SYD", name: "Kingsford Smith", cityName: "Sydney", countryName: "Australia", countryCode: "AU" },
+    { iataCode: "MEL", name: "Tullamarine", cityName: "Melbourne", countryName: "Australia", countryCode: "AU" },
+    { iataCode: "JFK", name: "John F. Kennedy Intl.", cityName: "New York", countryName: "United States", countryCode: "US" },
+    { iataCode: "LAX", name: "Los Angeles Intl.", cityName: "Los Angeles", countryName: "United States", countryCode: "US" },
+];
+
+const countryCodeToFlag = (code?: string): string | null => {
+    if (!code || code.length !== 2) return null;
+    const upper = code.toUpperCase();
+    const points = [...upper].map(ch => 0x1F1E6 - 65 + ch.charCodeAt(0));
+    return String.fromCodePoint(...points);
+};
+
+const fetchAirportSuggestions = async (keyword: string): Promise<AirportSuggestion[]> => {
+    if (!keyword || keyword.trim().length < 1) return [];
+    const term = keyword.trim().toLowerCase();
+
+    // Try live Amadeus-powered search first (if env is set)
+    try {
+        const res = await fetch(`/api/airport-search?keyword=${encodeURIComponent(keyword.trim())}`);
+        const json = await res.json();
+        if (res.ok && Array.isArray(json.data) && json.data.length > 0) {
+            return json.data;
+        }
+    } catch {
+        // ignore – will use static fallback below
+    }
+
+    // Fallback: filter static list so user still sees dropdown.
+    // IMPORTANT: we only match from the START of code/city/name,
+    // so typing "S" shows S* airports – not A* ones.
+    return STATIC_AIRPORTS.filter((a) => {
+        const code = a.iataCode.toLowerCase();
+        const name = a.name.toLowerCase();
+        const city = a.cityName.toLowerCase();
+        return (
+            code.startsWith(term) ||
+            name.startsWith(term) ||
+            city.startsWith(term)
+        );
+    });
+};
+
+function InputField({ icon, placeholder, name, value, onChange, required, enableAirportAutocomplete = false }: any) {
+    const [open, setOpen] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [options, setOptions] = useState<AirportSuggestion[]>([]);
+    const [highlight, setHighlight] = useState(-1);
+    const [displayValue, setDisplayValue] = useState<string>(value);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const triggerSearch = useCallback(async (term: string) => {
+        if (!enableAirportAutocomplete) return;
+        if (!term || term.trim().length < 1) {
+            setOptions([]);
+            setOpen(false);
+            return;
+        }
+        setLoading(true);
+        const data = await fetchAirportSuggestions(term);
+        setOptions(data);
+        setOpen(data.length > 0);
+        setHighlight(data.length > 0 ? 0 : -1);
+        setLoading(false);
+    }, [enableAirportAutocomplete]);
+
+    // Keep displayValue initialised from outside only when it is empty
+    useEffect(() => {
+        if (!displayValue && value) {
+            setDisplayValue(value);
+        }
+    }, [value, displayValue]);
+
+    useEffect(() => {
+        if (!enableAirportAutocomplete) return;
+        if (debounceRef.current) clearTimeout(debounceRef.current);
+        debounceRef.current = setTimeout(() => {
+            triggerSearch(displayValue);
+        }, 300);
+        return () => {
+            if (debounceRef.current) clearTimeout(debounceRef.current);
+        };
+    }, [displayValue, enableAirportAutocomplete, triggerSearch]);
+
+    useEffect(() => {
+        if (!enableAirportAutocomplete) return;
+        function handleClickOutside(e: MouseEvent) {
+            if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+                setOpen(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [enableAirportAutocomplete]);
+
+    const handleInternalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setDisplayValue(e.target.value);
+        onChange(e);
+        if (!enableAirportAutocomplete) return;
+        // value-change debounce handled by effect above through displayValue
+    };
+
+    const handleSelect = (opt: AirportSuggestion) => {
+        const code = opt.iataCode.toUpperCase();
+        const primaryCity = opt.cityName || opt.name;
+        const label = primaryCity
+            ? `${primaryCity} ${code ? `(${code})` : ""}`.trim()
+            : code;
+        setDisplayValue(label);
+        const event = {
+            target: { name, value: code }
+        } as unknown as React.ChangeEvent<HTMLInputElement>;
+        onChange(event);
+        setOpen(false);
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (!enableAirportAutocomplete || !open || options.length === 0) return;
+        if (e.key === "ArrowDown") {
+            e.preventDefault();
+            setHighlight(h => (h < options.length - 1 ? h + 1 : 0));
+        } else if (e.key === "ArrowUp") {
+            e.preventDefault();
+            setHighlight(h => (h > 0 ? h - 1 : options.length - 1));
+        } else if (e.key === "Enter" && highlight >= 0) {
+            e.preventDefault();
+            handleSelect(options[highlight]);
+        } else if (e.key === "Escape") {
+            setOpen(false);
+        }
+    };
+
     return (
-        <div className="relative group">
+        <div ref={containerRef} className="relative group">
             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors z-10">{icon}</div>
             <input
-                type="text" name={name} placeholder={placeholder} value={value} onChange={onChange}
+                type="text"
+                name={name}
+                placeholder={placeholder}
+                value={displayValue}
+                onChange={handleInternalChange}
+                onFocus={() => enableAirportAutocomplete && options.length > 0 && setOpen(true)}
+                onKeyDown={handleKeyDown}
                 className="w-full pl-12 pr-4 py-4 bg-white text-gray-900 shadow-lg outline-none font-bold text-sm uppercase placeholder:text-gray-300 focus:ring-4 focus:ring-black/5"
             />
             {required && <span className="absolute -bottom-5 left-0 text-[9px] text-white/60 font-black uppercase">Required Field</span>}
+
+            {enableAirportAutocomplete && (open || loading) && (
+                <ul className="absolute top-full left-0 right-0 mt-3 min-w-[min(100%,420px)] w-full max-w-[420px] max-h-[min(70vh,480px)] bg-white border-2 border-gray-100 rounded-2xl shadow-[0_20px_60px_rgba(7,28,75,0.2)] overflow-y-auto z-[100] py-3 text-left">
+                    {loading && options.length === 0 ? (
+                        <li className="px-6 py-5 text-base font-medium text-gray-500">Searching airports…</li>
+                    ) : (
+                        options.map((opt, idx) => {
+                            const primaryCity = opt.cityName || opt.name;
+                            const primary = primaryCity
+                                ? `${primaryCity} ${opt.iataCode ? `(${opt.iataCode.toUpperCase()})` : ""}`.trim()
+                                : (opt.iataCode || "").toUpperCase();
+                            const secondary = opt.name && opt.name !== primaryCity ? opt.name : "";
+                            const country = opt.countryName || "";
+                            const flag = countryCodeToFlag(opt.countryCode);
+                            return (
+                                <li
+                                    key={`${opt.iataCode}-${idx}`}
+                                    onMouseDown={(e) => {
+                                        e.preventDefault();
+                                        handleSelect(opt);
+                                    }}
+                                    onMouseEnter={() => setHighlight(idx)}
+                                    className={`px-6 py-4 cursor-pointer flex items-center gap-4 border-b border-gray-100 last:border-b-0 transition-colors ${
+                                        idx === highlight ? "bg-[#071C4B]/10" : "hover:bg-[#F3F5FB]"
+                                    }`}
+                                >
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center justify-between gap-3">
+                                            <span className="text-base md:text-lg font-bold text-[#071C4B] truncate">
+                                                {primary}
+                                            </span>
+                                            {(country || flag) && (
+                                                <div className="flex items-center gap-2 shrink-0">
+                                                    {country && (
+                                                        <span className="text-sm font-semibold text-gray-600 hidden sm:inline">
+                                                            {country}
+                                                        </span>
+                                                    )}
+                                                    {flag && (
+                                                        <span className="text-xl leading-none">
+                                                            {flag}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                        {secondary && (
+                                            <span className="text-sm text-gray-500 leading-snug block mt-1 truncate">
+                                                {secondary}
+                                            </span>
+                                        )}
+                                    </div>
+                                </li>
+                            );
+                        })
+                    )}
+                </ul>
+            )}
         </div>
     );
 }

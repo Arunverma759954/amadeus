@@ -5,6 +5,8 @@ import { getFlightAncillaries, getFlightSeatmaps } from "@/src/lib/flights";
 import { FaChair, FaUtensils, FaTimes, FaCheck, FaPlane, FaUser } from "react-icons/fa";
 import { GiMeal } from "react-icons/gi";
 import SeatMap from "./SeatMap";
+import { formatCurrency } from "@/src/lib/currency";
+import { useDisplayCurrency } from "@/src/contexts/CurrencyContext";
 
 interface FlightExtrasProps {
     flight: any;
@@ -13,6 +15,7 @@ interface FlightExtrasProps {
 }
 
 export default function FlightExtras({ flight, initialTab = 'details', onClose }: FlightExtrasProps) {
+    const { displayCurrency } = useDisplayCurrency();
     const [activeTab, setActiveTab] = useState<'details' | 'seats' | 'meals' | 'passenger'>(initialTab);
     const [seatmap, setSeatmap] = useState<any>(null);
     const [ancillaries, setAncillaries] = useState<any>(null);
@@ -176,18 +179,18 @@ export default function FlightExtras({ flight, initialTab = 'details', onClose }
                                     <div className="space-y-3">
                                         <div className="flex justify-between text-sm">
                                             <span className="opacity-70 font-bold uppercase tracking-tighter">Base Fare (1 Adult)</span>
-                                            <span className="font-black">INR {parseFloat(flight.basePrice || flight.price.total).toLocaleString('en-IN')}</span>
+                                            <span className="font-black">{formatCurrency(parseFloat(flight.basePrice || flight.price.total), flight.price.currency, displayCurrency)}</span>
                                         </div>
                                         {flight.adjustment !== 0 && (
                                             <div className="flex justify-between text-sm">
                                                 <span className="opacity-70 font-bold uppercase tracking-tighter">Markup ({flight.adjustment}%)</span>
-                                                <span className="font-black">INR {(parseFloat(flight.price.total) - parseFloat(flight.basePrice || flight.price.total)).toLocaleString('en-IN')}</span>
+                                                <span className="font-black">{formatCurrency((parseFloat(flight.price.total) - parseFloat(flight.basePrice || flight.price.total)), flight.price.currency, displayCurrency)}</span>
                                             </div>
                                         )}
                                         <div className="pt-4 border-t border-white/10 flex justify-between items-end">
                                             <div>
                                                 <div className="text-[10px] font-black opacity-60 uppercase tracking-widest">Grand Total</div>
-                                                <div className="text-3xl font-black">INR {parseFloat(flight.price.total).toLocaleString('en-IN')}</div>
+                                                <div className="text-3xl font-black">{formatCurrency(parseFloat(flight.price.total), flight.price.currency, displayCurrency)}</div>
                                             </div>
                                             <div className="text-[9px] font-bold opacity-60 uppercase tracking-tighter text-right">
                                                 Includes all taxes <br /> & surcharges

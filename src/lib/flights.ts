@@ -15,7 +15,7 @@ export const searchFlights = async (params: FlightSearchParams) => {
         console.log("🚀 [FLIGHT SEARCH] Invoking Edge Function:", params);
 
         const { data, error } = await supabase.functions.invoke('search-flights', {
-            body: params
+            body: { ...params, currency: 'AUD' }
         });
 
         if (error) {

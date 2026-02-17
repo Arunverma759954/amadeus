@@ -1,5 +1,5 @@
 import "./globals.css";
-
+import { CurrencyProvider } from "@/src/contexts/CurrencyContext";
 
 export const metadata = {
   title: "Amadeus",
@@ -13,7 +13,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <CurrencyProvider>{children}</CurrencyProvider>
+      </body>
     </html>
   );
 }

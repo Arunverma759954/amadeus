@@ -13,9 +13,12 @@ import DetailsModal from "./components/DetailsModal";
 import SearchingOverlay from "./components/SearchingOverlay";
 import { supabase } from "@/src/lib/supabase";
 import { searchFlights } from "@/src/lib/flights";
-import { FaChevronDown, FaWhatsapp, FaPhoneAlt, FaCheckCircle, FaStar, FaGoogle, FaChevronLeft, FaChevronRight, FaDollarSign, FaThumbsUp, FaMedal, FaArrowLeft, FaPlane, FaSearch, FaTimes } from "react-icons/fa";
+import { FaChevronDown, FaWhatsapp, FaPhoneAlt, FaCheckCircle, FaStar, FaGoogle, FaChevronLeft, FaChevronRight, FaDollarSign, FaThumbsUp, FaMedal, FaArrowLeft, FaPlane, FaSearch, FaTimes, FaArrowUp } from "react-icons/fa";
+import { formatCurrency, isIndiaRoute } from "@/src/lib/currency";
+import { useDisplayCurrency } from "@/src/contexts/CurrencyContext";
 
 export default function Home() {
+    const { displayCurrency } = useDisplayCurrency();
     const [results, setResults] = useState<any | null>(null);
     const [dictionaries, setDictionaries] = useState<any>(null);
     const [selectedFlight, setSelectedFlight] = useState<{ offer: FlightOffer, tab: 'details' | 'seats' | 'meals' } | null>(null);
@@ -35,7 +38,23 @@ export default function Home() {
     const [showFilters, setShowFilters] = useState(false);
     const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
     const [searchParams, setSearchParams] = useState<any>(null); // Store current search params for slider use
+    // India–India route (e.g. Delhi–Ahmedabad) → show INR; else use locale-based currency (AUD/USD)
+    const isIndia = isIndiaRoute(searchParams?.origin, searchParams?.destination);
+    const effectiveCurrency = isIndia ? "INR" : displayCurrency;
     const searchCache = useRef<Record<string, any>>({});
+    const [showScrollTop, setShowScrollTop] = useState(false);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            setShowScrollTop(window.scrollY > 300);
+        };
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    const scrollToTop = () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
     // Fetch user and offers
     useEffect(() => {
@@ -235,11 +254,11 @@ export default function Home() {
 
     if (results) {
         return (
-            <main className="min-h-screen bg-[#F8FAFC] font-sans">
+            <main className="min-h-screen bg-[#F8FAFC] font-sans overflow-x-hidden">
                 <div className="sticky top-0 z-[1000] w-full bg-white shadow-md">
                     <Header />
                     <div className="bg-white border-t border-gray-100">
-                        <div className="max-w-7xl mx-auto px-2 sm:px-8 py-2 md:py-3">
+                        <div className="w-full px-4 sm:px-6 lg:px-8 py-2 md:py-3">
                             <ModifySearchForm
                                 initialParams={searchParams}
                                 markup={pricingAdjustment}
@@ -253,31 +272,31 @@ export default function Home() {
                     </div>
                 </div>
 
-                <div className="max-w-7xl mx-auto px-4 sm:px-8 py-4 md:py-8">
+                <div className="w-full px-4 sm:px-6 lg:px-8 py-5 md:py-8 bg-gradient-to-b from-gray-50/50 to-[#F8FAFC]">
                     {/* Mobile Only: Quick Filter Button */}
                     <div className="lg:hidden flex items-center justify-between gap-4 mb-4">
                         <button
                             onClick={() => setIsMobileFiltersOpen(true)}
-                            className="flex-1 bg-white border border-gray-300 rounded-xl py-3 px-4 flex items-center justify-center gap-2 text-sm font-bold text-[#071C4B] shadow-sm"
+                            className="flex-1 bg-white border border-gray-200 rounded-xl py-3.5 px-4 flex items-center justify-center gap-2 text-sm font-bold text-[#071C4B] shadow-[0_2px_12px_rgba(7,28,75,0.06)]"
                         >
-                            <FaSearch className="text-blue-600" />
+                            <FaSearch className="text-[#071C4B]" />
                             Filters & Sort
                         </button>
                     </div>
-                    <div className="flex flex-col lg:flex-row gap-8">
+                    <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
                         {/* Sidebar Filters (Desktop always, Mobile Drawer) */}
                         <aside className={`${isMobileFiltersOpen ? 'fixed inset-0 z-[2000] bg-white p-6 overflow-y-auto block' : 'hidden'} lg:block w-full lg:w-72 shrink-0 space-y-6`}>
                             <div className="lg:hidden flex justify-between items-center mb-6">
                                 <h2 className="text-xl font-black text-[#071C4B]">Filters</h2>
-                                <button onClick={() => setIsMobileFiltersOpen(false)} className="p-2 text-gray-400">
+                                <button onClick={() => setIsMobileFiltersOpen(false)} className="p-2 text-gray-400 hover:text-gray-600">
                                     <FaTimes size={20} />
                                 </button>
                             </div>
 
-                            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden sticky top-24">
-                                <div className="p-6 border-b border-gray-50 space-y-3 bg-gray-50/30">
+                            <div className="bg-white rounded-2xl shadow-[0_2px_16px_rgba(7,28,75,0.06)] border border-gray-100 overflow-hidden sticky top-24">
+                                <div className="p-5 border-b border-gray-100 space-y-3 bg-gray-50/40">
                                     <div className="flex justify-between items-center">
-                                        <h2 className="text-[11px] font-black text-[#071C4B] uppercase tracking-[0.2em]">Refine Search</h2>
+                                        <h2 className="text-xs font-black text-[#071C4B] uppercase tracking-widest">Refine search</h2>
                                         <button
                                             onClick={() => {
                                                 setSelectedAirlines([]);
@@ -287,15 +306,16 @@ export default function Home() {
                                                 setBaggageOnly(false);
                                                 setMaxPrice(null);
                                             }}
-                                            className="text-[9px] font-black text-blue-600 hover:underline uppercase"
+                                            className="text-[10px] font-bold text-[#071C4B] hover:underline uppercase"
                                         >
                                             Reset
                                         </button>
                                     </div>
-                                    <div className="flex flex-col gap-1 border-t border-gray-100 pt-3">
-                                        <span className="text-[9px] font-black text-gray-400 uppercase">Markup: {pricingAdjustment}%</span>
-                                        <span className="text-[9px] font-black text-green-600 uppercase flex items-center gap-1">
-                                            Live Pricing <span className="animate-pulse w-1.5 h-1.5 bg-green-600 rounded-full"></span>
+                                    <div className="flex flex-col gap-1 pt-2 border-t border-gray-100">
+                                        <span className="text-[10px] font-bold text-gray-500">Markup: {pricingAdjustment}%</span>
+                                        <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-1.5">
+                                            <span className="animate-pulse w-2 h-2 bg-emerald-500 rounded-full" />
+                                            Live pricing
                                         </span>
                                     </div>
                                 </div>
@@ -331,15 +351,15 @@ export default function Home() {
                                         <div className="flex justify-between items-center">
                                             <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Max Budget</h4>
                                             <span className="text-[10px] font-black text-[#071C4B] bg-blue-50 px-2 py-0.5 rounded">
-                                                ₹{(maxPrice || 0).toLocaleString('en-IN')}
+                                                {formatCurrency((maxPrice || 0), 'AUD', effectiveCurrency)}
                                             </span>
                                         </div>
                                         <input
                                             type="range"
                                             min="0"
-                                            max={maxPrice ? Math.max(maxPrice, 500000) : 500000}
-                                            step="5000"
-                                            value={maxPrice || 500000}
+                                            max={maxPrice ? Math.max(maxPrice, 10000) : 10000}
+                                            step="100"
+                                            value={maxPrice || 10000}
                                             onChange={(e) => setMaxPrice(parseInt(e.target.value))}
                                             className="w-full h-1.5 bg-gray-100 rounded-full appearance-none cursor-pointer accent-[#071C4B]"
                                         />
@@ -403,8 +423,8 @@ export default function Home() {
 
                         {/* RIGHT: Results & Sorting */}
                         <div className="flex-1 space-y-6">
-                            {/* Date Selector Slider - Premium Lufthansa Style */}
-                            <div className="bg-white rounded-2xl md:rounded-[2rem] shadow-sm border border-gray-100 p-2 overflow-x-auto no-scrollbar flex items-center">
+                            {/* Date Selector */}
+                            <div className="bg-white rounded-2xl md:rounded-[1.25rem] shadow-[0_2px_16px_rgba(7,28,75,0.06)] border border-gray-100 p-2.5 overflow-x-auto no-scrollbar">
                                 <div className="flex gap-2 min-w-max md:min-w-0 md:flex-1">
                                     {(() => {
                                         const baseDate = searchParams?.departureDate ? new Date(searchParams.departureDate) : new Date();
@@ -414,23 +434,21 @@ export default function Home() {
                                             const ds = date.toISOString().split('T')[0];
                                             const isSelected = ds === (searchParams?.departureDate);
 
-                                            // Mock/Estimate price if possible
-                                            const baseP = results?.length > 0 ? Math.min(...results.map((r: any) => parseFloat(r.price.total))) : 50000;
+                                            const baseP = results?.length > 0 ? Math.min(...results.map((r: any) => parseFloat(r.price.total))) : 800;
                                             const estP = Math.round(baseP * (1 + (pricingAdjustment / 100)) * (1 + (Math.random() * 0.1 - 0.05)));
 
                                             return (
                                                 <button
                                                     key={i}
                                                     onClick={() => handleDateChange(ds)}
-                                                    className={`w-20 md:flex-1 py-3 md:py-4 flex flex-col items-center justify-center rounded-xl md:rounded-2xl transition-all duration-300 ${isSelected ? 'bg-[#071C4B] text-white shadow-xl shadow-blue-900/20 scale-[1.05] z-10' : 'hover:bg-gray-50 text-gray-500'
-                                                        }`}
+                                                    className={`w-20 md:flex-1 py-3.5 md:py-4 flex flex-col items-center justify-center rounded-xl md:rounded-2xl transition-all duration-200 ${isSelected ? 'bg-[#071C4B] text-white shadow-lg shadow-[#071C4B]/25 ring-2 ring-[#071C4B]/20 scale-[1.02] z-10' : 'hover:bg-gray-50 text-gray-600 border border-transparent hover:border-gray-100'}`}
                                                 >
-                                                    <span className={`text-[8px] md:text-[9px] font-black uppercase tracking-tighter mb-1 ${isSelected ? 'opacity-60' : 'text-gray-400'}`}>
+                                                    <span className={`text-[8px] md:text-[9px] font-bold uppercase tracking-tight mb-0.5 ${isSelected ? 'text-white/70' : 'text-gray-400'}`}>
                                                         {date.toLocaleDateString('en-US', { weekday: 'short' })}
                                                     </span>
-                                                    <span className="text-base md:text-lg font-black leading-none mb-1">{date.getDate()}</span>
-                                                    <span className={`text-[7px] md:text-[8px] font-bold ${isSelected ? 'text-white/80' : 'text-green-600'}`}>
-                                                        ₹{(estP / 1000).toFixed(1)}k
+                                                    <span className="text-base md:text-lg font-black leading-none mb-1 tabular-nums">{date.getDate()}</span>
+                                                    <span className={`text-[8px] font-bold ${isSelected ? 'text-white/90' : 'text-emerald-600'}`}>
+                                                        {formatCurrency(estP, 'AUD', effectiveCurrency)}
                                                     </span>
                                                 </button>
                                             );
@@ -439,34 +457,32 @@ export default function Home() {
                                 </div>
                             </div>
 
-                            {/* Sort Actions */}
-                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-2">
-                                <h1 className="text-base md:text-lg font-black text-[#071C4B] uppercase tracking-widest flex items-center gap-3">
-                                    Departure Flights
-                                    <span className="bg-blue-50 text-blue-600 px-3 py-1 rounded-full text-[9px] font-black border border-blue-100">
-                                        {filteredResults.length} / {results?.length || 0} Found
+                            {/* Sort + Results header */}
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-1">
+                                <h1 className="text-lg md:text-xl font-black text-[#071C4B] tracking-tight flex items-center gap-3 flex-wrap">
+                                    Departure flights
+                                    <span className="inline-flex items-center px-3 py-1.5 rounded-full bg-[#071C4B]/08 text-[#071C4B] text-xs font-bold border border-[#071C4B]/10">
+                                        {filteredResults.length} / {results?.length || 0} found
                                     </span>
                                 </h1>
                                 <div className="flex gap-2 w-full sm:w-auto">
                                     <button
                                         onClick={() => setSortBy('price')}
-                                        className={`flex-1 sm:flex-none px-4 md:px-5 py-2 md:py-2.5 rounded-xl text-[8px] md:text-[9px] font-black uppercase tracking-widest border transition-all ${sortBy === 'price' ? 'bg-[#071C4B] text-white border-[#071C4B]' : 'bg-white text-gray-400 border-gray-100 hover:bg-gray-50'
-                                            }`}
+                                        className={`flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-wider border transition-all ${sortBy === 'price' ? 'bg-[#071C4B] text-white border-[#071C4B] shadow-sm' : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300 hover:bg-gray-50'}`}
                                     >
                                         Cheapest
                                     </button>
                                     <button
                                         onClick={() => setSortBy('duration')}
-                                        className={`flex-1 sm:flex-none px-4 md:px-5 py-2 md:py-2.5 rounded-xl text-[8px] md:text-[9px] font-black uppercase tracking-widest border transition-all ${sortBy === 'duration' ? 'bg-[#071C4B] text-white border-[#071C4B]' : 'bg-white text-gray-400 border-gray-100 hover:bg-gray-50'
-                                            }`}
+                                        className={`flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-wider border transition-all ${sortBy === 'duration' ? 'bg-[#071C4B] text-white border-[#071C4B] shadow-sm' : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300 hover:bg-gray-50'}`}
                                     >
                                         Fastest
                                     </button>
                                 </div>
                             </div>
 
-                            {/* Main List Container */}
-                            <div className="relative min-h-[400px]">
+                            {/* Main List Container – only this section scrolls on desktop */}
+                            <div className="relative min-h-[400px] lg:max-h-[calc(100vh-260px)] lg:overflow-y-auto lg:pr-1">
                                 {isRefreshing && (
                                     <div className="absolute top-0 left-0 right-0 z-50 h-1.5 overflow-hidden rounded-t-[2rem]">
                                         <div className="h-full bg-gradient-to-r from-red-600 via-blue-900 to-red-600 w-full animate-loading-bar shadow-[0_0_10px_rgba(196,30,34,0.5)]"></div>
@@ -481,12 +497,12 @@ export default function Home() {
                                     </div>
                                 )}
 
-                                <div className={`space-y-6 transition-all duration-500 ${isRefreshing ? 'opacity-30 blur-sm pointer-events-none' : 'opacity-100'}`}>
+                                <div className={`space-y-5 transition-all duration-500 ${isRefreshing ? 'opacity-30 blur-sm pointer-events-none' : 'opacity-100'}`}>
                                     {filteredResults.length === 0 ? (
-                                        <div className="bg-white border-2 border-dashed border-gray-100 rounded-[2rem] p-20 flex flex-col items-center text-center">
-                                            <div className="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center text-4xl mb-6 grayscale opacity-30">✈️</div>
-                                            <h3 className="text-xl font-black text-[#071C4B] uppercase tracking-widest">No Flights Found</h3>
-                                            <p className="text-sm text-gray-400 font-medium max-w-xs mt-2">We couldn't find any flights matching your current filters. Try resetting them.</p>
+                                        <div className="bg-white border-2 border-dashed border-gray-200 rounded-2xl p-16 flex flex-col items-center text-center">
+                                            <div className="w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center text-3xl mb-5 text-gray-400">✈️</div>
+                                            <h3 className="text-lg font-black text-[#071C4B]">No flights found</h3>
+                                            <p className="text-sm text-gray-500 max-w-xs mt-2">Try resetting filters or changing dates.</p>
                                             <button
                                                 onClick={() => {
                                                     setSelectedAirlines([]);
@@ -494,9 +510,9 @@ export default function Home() {
                                                     setTimeSlots([]);
                                                     setMaxPrice(null);
                                                 }}
-                                                className="mt-8 px-8 py-3 bg-[#071C4B] text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-blue-900/10"
+                                                className="mt-6 px-6 py-2.5 bg-[#071C4B] text-white rounded-xl font-bold text-xs uppercase tracking-wider shadow-lg shadow-[#071C4B]/15"
                                             >
-                                                Clear All Filters
+                                                Clear filters
                                             </button>
                                         </div>
                                     ) : (
@@ -514,12 +530,19 @@ export default function Home() {
                                                 adjustment: pricingAdjustment
                                             };
 
+                                            const badgeForFirst = index === 0
+                                                ? (sortBy === 'price' ? 'cheapest' : sortBy === 'duration' ? 'fastest' : 'recommended')
+                                                : undefined;
+
                                             return (
                                                 <FlightCard
                                                     key={index}
                                                     offer={adjustedOffer}
                                                     dictionaries={dictionaries}
                                                     onViewDetails={handleBookingClick}
+                                                    badge={badgeForFirst}
+                                                    variant={index % 2 === 1 ? 'alt' : 'default'}
+                                                    displayCurrency={effectiveCurrency}
                                                 />
                                             );
                                         })
@@ -540,7 +563,7 @@ export default function Home() {
             {/* Hero */}
             <section className="relative z-50 overflow-visible">
                 <HeroSlider />
-                <div className="absolute bottom-0 left-0 right-0 z-[100] translate-y-1/2 flex justify-center px-4">
+                <div className="absolute bottom-72 md:bottom-80 left-0 right-0 z-[100] translate-y-1/2 flex justify-center px-4">
                     <div className="w-full max-w-7xl">
                         <SearchForm
                             onResults={handleResults}
@@ -552,8 +575,8 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* Info Section */}
-            <section className="bg-[#f7f7f7] py-12 md:py-20 mt-[450px] sm:mt-[520px] lg:mt-40 transition-all duration-700">
+            {/* Info Section - Reduce top margin as form moves UP */}
+            <section className="bg-[#f7f7f7] py-12 md:py-20 mt-[400px] sm:mt-[350px] lg:mt-24 transition-all duration-700">
                 <div className="max-w-6xl mx-auto px-4 md:px-6 lg:px-0 space-y-10 md:space-y-16">
                     <h2 className="text-3xl md:text-5xl font-handwriting text-[#111827] text-center mb-4 md:mb-8 leading-tight">
                         Fly Safe with HiFi Travels Hassle-free
@@ -996,6 +1019,16 @@ export default function Home() {
                     onClose={() => setSelectedFlight(null)}
                 />
             )}
+
+            {/* Scroll to Top Button */}
+            <button
+                onClick={scrollToTop}
+                className={`fixed bottom-8 right-8 z-[2000] p-4 bg-[#071C4B] text-white rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 hover:bg-blue-800 ${showScrollTop ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'
+                    }`}
+                aria-label="Scroll to top"
+            >
+                <FaArrowUp />
+            </button>
         </main>
     );
 }

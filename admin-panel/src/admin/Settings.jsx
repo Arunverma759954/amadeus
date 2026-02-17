@@ -86,7 +86,7 @@ const Settings = () => {
             <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6 opacity-50 grayscale pointer-events-none">
                 <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
                     <h3 className="font-bold text-gray-700 mb-2">System Currency</h3>
-                    <p className="text-xs text-gray-400 uppercase font-black">INR (₹)</p>
+                    <p className="text-xs text-gray-400 uppercase font-black">AUD ($)</p>
                 </div>
                 <div className="bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
                     <h3 className="font-bold text-gray-700 mb-2">API Provider</h3>

@@ -5,9 +5,12 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Header from "../components/Header";
 import { FaLock, FaPlane, FaArrowLeft, FaCreditCard, FaRegQuestionCircle } from "react-icons/fa";
+import { formatCurrency } from "@/src/lib/currency";
+import { useDisplayCurrency } from "@/src/contexts/CurrencyContext";
 
 export default function PaymentPage() {
     const router = useRouter();
+    const { displayCurrency } = useDisplayCurrency();
     const [selectedFlight, setSelectedFlight] = useState<any>(null);
 
     useEffect(() => {
@@ -42,6 +45,7 @@ export default function PaymentPage() {
     const firstSegment = itinerary.segments[0];
     const lastSegment = itinerary.segments[itinerary.segments.length - 1];
 
+    const priceCurrency = offer.price?.currency || "AUD";
     const baseFare = parseFloat(offer.price.total);
     const taxes = baseFare * 0.265;
     const total = baseFare + taxes;
@@ -130,7 +134,7 @@ export default function PaymentPage() {
                                     type="submit"
                                     className="w-full bg-[#C41E22] hover:bg-[#A0181B] text-white font-black py-4 rounded-xl shadow-lg shadow-red-600/20 transition-all transform hover:scale-[1.01] active:scale-[0.99] uppercase tracking-widest flex items-center justify-center gap-3 text-sm"
                                 >
-                                    PAY INR {total.toLocaleString('en-IN')}
+                                    PAY {formatCurrency(total, priceCurrency, displayCurrency)}
                                 </button>
                                 <div className="flex items-center justify-center gap-1.5 mt-3 opacity-50">
                                     <FaLock size={8} className="text-[#071C4B]" />
@@ -184,15 +188,15 @@ export default function PaymentPage() {
                             <div className="pt-4 border-t border-white/10 space-y-2">
                                 <div className="flex justify-between text-[10px] font-bold text-white/60">
                                     <span>Base Fare</span>
-                                    <span>₹{baseFare.toLocaleString('en-IN')}</span>
+                                    <span>{formatCurrency(baseFare, priceCurrency, displayCurrency)}</span>
                                 </div>
                                 <div className="flex justify-between text-[10px] font-bold text-white/60">
                                     <span>Taxes</span>
-                                    <span>₹{taxes.toLocaleString('en-IN')}</span>
+                                    <span>{formatCurrency(taxes, priceCurrency, displayCurrency)}</span>
                                 </div>
                                 <div className="flex justify-between items-end mt-4 pt-4 border-t border-white/10">
                                     <span className="text-xs font-black uppercase tracking-widest">Total</span>
-                                    <span className="text-2xl font-black text-white tracking-tighter">₹{total.toLocaleString('en-IN')}</span>
+                                    <span className="text-2xl font-black text-white tracking-tighter">{formatCurrency(total, priceCurrency, displayCurrency)}</span>
                                 </div>
                             </div>
                         </div>
