@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import Header from "./components/Header";
 import HeroSlider from "./components/HeroSlider";
 import SearchForm from "./components/SearchForm";
+import ContactSection from "./components/ContactSection";
 import ModifySearchForm from "./components/ModifySearchForm";
 import FlightCard, { FlightOffer } from "./components/FlightCard";
 import DetailsModal from "./components/DetailsModal";
@@ -657,6 +658,9 @@ export default function Home() {
                     </a>
                 </div>
             </section>
+
+            {/* Contact form – submits as Lead in Admin CRM (source: website) */}
+            <ContactSection />
 
             {/* Top Recommended Destinations */}
             <section className="bg-white py-16 md:py-20">

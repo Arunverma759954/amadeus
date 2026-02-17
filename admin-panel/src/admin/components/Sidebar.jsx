@@ -11,7 +11,8 @@ import {
     Users,
     ClipboardList,
     ChevronUp,
-    Star
+    Star,
+    ContactRound
 } from 'lucide-react';
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
@@ -141,6 +142,15 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                                 >
                                     <Users className="h-6 w-6" />
                                     User Management
+                                </NavLink>
+                            </li>
+                            <li>
+                                <NavLink
+                                    to="/admin/crm"
+                                    className={({ isActive }) => isActive ? activeItemClass : inactiveItemClass}
+                                >
+                                    <ContactRound className="h-6 w-6" />
+                                    CRM
                                 </NavLink>
                             </li>
                             <li>

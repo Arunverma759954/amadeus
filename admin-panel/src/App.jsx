@@ -9,6 +9,7 @@ import Users from './admin/Users';
 import Settings from './admin/Settings';
 import Bookings from './admin/Bookings';
 import ContentManagement from './admin/ContentManagement';
+import CRM from './admin/CRM';
 import Login from './admin/Login';
 
 const RequireAuth = ({ children }) => {
@@ -75,6 +76,7 @@ function App() {
           <Route path="profile" element={<Profile />} />
           <Route path="users" element={<Users />} />
           <Route path="bookings" element={<Bookings />} />
+          <Route path="crm" element={<CRM />} />
           <Route path="content" element={<ContentManagement />} />
           <Route path="settings" element={<Settings />} />
         </Route>

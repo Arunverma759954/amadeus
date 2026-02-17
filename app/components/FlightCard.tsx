@@ -54,6 +54,7 @@ const AIRPORT_FULL_NAMES: Record<string, string> = {
     SYD: "Sydney", SIN: "Singapore", MEL: "Melbourne", BOM: "Mumbai", DEL: "Delhi", BLR: "Bengaluru",
     MAA: "Chennai", HYD: "Hyderabad", CCU: "Kolkata", AMD: "Ahmedabad", COK: "Kochi", GOI: "Goa",
     LHR: "London", DXB: "Dubai", AUH: "Abu Dhabi", BKK: "Bangkok", KUL: "Kuala Lumpur", HKG: "Hong Kong",
+    DOH: "Doha",
     NRT: "Tokyo", ICN: "Seoul", PVG: "Shanghai", PEK: "Beijing", JFK: "New York", LAX: "Los Angeles",
     SFO: "San Francisco", ORD: "Chicago", FRA: "Frankfurt", CDG: "Paris", AMS: "Amsterdam", AKL: "Auckland",
     PER: "Perth", BNE: "Brisbane", ADL: "Adelaide", CNS: "Cairns", CBR: "Canberra", DRW: "Darwin",
@@ -101,6 +102,26 @@ export default function FlightCard({ offer, dictionaries, onViewDetails, badge, 
     const stopsCount = itinerary.segments.length - 1;
     const stopsLabel =
         stopsCount === 0 ? "Non-stop" : `${stopsCount} stop${stopsCount > 1 ? "s" : ""}`;
+
+    // For connecting flights, show which cities are used as stopovers (e.g. DEL → BOM via JAI).
+    const stopCodes =
+        stopsCount > 0
+            ? itinerary.segments.slice(0, -1).map((seg) => seg.arrival.iataCode)
+            : [];
+    const stopCities =
+        stopCodes.length > 0
+            ? stopCodes.map((code) => {
+                  const loc = findLocationByIata(code);
+                  const place = formatPlace(loc, code);
+                  return `${place.city} (${code})`;
+              })
+            : [];
+    const stopsDetailLabel =
+        stopCities.length === 0
+            ? null
+            : stopCities.length === 1
+            ? `Via ${stopCities[0]}`
+            : `Via ${stopCities.join(", ")}`;
 
     const hasBaggage = (() => {
         const tp = offer.travelerPricings?.[0];
@@ -174,7 +195,7 @@ export default function FlightCard({ offer, dictionaries, onViewDetails, badge, 
                     </div>
                 </div>
 
-                {/* Route: cities + date */}
+                {/* Route: cities + date + stopover cities */}
                 <div className="mb-3">
                     <p className="text-[11px] md:text-xs font-semibold text-[#071C4B]">
                         {originPlace.city} ({firstSegment.departure.iataCode}) → {destPlace.city} ({lastSegment.arrival.iataCode})
@@ -185,6 +206,11 @@ export default function FlightCard({ offer, dictionaries, onViewDetails, badge, 
                         {depDate.toLocaleDateString("en-US", { day: "2-digit", month: "short" })}
                         {!sameDay && ` – ${arrDate.toLocaleDateString("en-US", { day: "2-digit", month: "short" })}`}
                     </p>
+                    {stopsDetailLabel && (
+                        <p className="text-[9px] md:text-[11px] text-gray-500 mt-0.5">
+                            {stopsDetailLabel}
+                        </p>
+                    )}
                 </div>
 
                 {/* Chips: bags + details */}
