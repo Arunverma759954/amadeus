@@ -428,10 +428,15 @@ export default function Home() {
                             <div className="bg-white rounded-2xl md:rounded-[1.25rem] shadow-[0_2px_16px_rgba(7,28,75,0.06)] border border-gray-100 p-2.5 overflow-x-auto no-scrollbar">
                                 <div className="flex gap-2 min-w-max md:min-w-0 md:flex-1">
                                     {(() => {
-                                        const baseDate = searchParams?.departureDate ? new Date(searchParams.departureDate) : new Date();
+                                        // Do not show back dates – only today and future
+                                        const today = new Date();
+                                        today.setHours(0, 0, 0, 0);
+                                        const selectedDate = searchParams?.departureDate ? new Date(searchParams.departureDate) : today;
+                                        const startDate = selectedDate < today ? today : selectedDate;
+
                                         return Array.from({ length: 7 }).map((_, i) => {
-                                            const date = new Date(baseDate);
-                                            date.setDate(baseDate.getDate() + (i - 3));
+                                            const date = new Date(startDate);
+                                            date.setDate(startDate.getDate() + i);
                                             const ds = date.toISOString().split('T')[0];
                                             const isSelected = ds === (searchParams?.departureDate);
 

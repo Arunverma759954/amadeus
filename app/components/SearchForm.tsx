@@ -14,6 +14,10 @@ interface SearchFormProps {
 }
 
 export default function SearchForm({ onResults, onSearchStart, onError, autoSearchDate }: SearchFormProps) {
+    // Ensure default dates are always today and future (no back dates)
+    const todayIso = new Date().toISOString().split('T')[0];
+    const defaultReturnIso = new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
     const [activeTab, setActiveTab] = useState<'flight' | 'hotel' | 'insurance'>('flight');
     const [loading, setLoading] = useState(false);
     const [tripType, setTripType] = useState('round');
@@ -22,8 +26,8 @@ export default function SearchForm({ onResults, onSearchStart, onError, autoSear
     const [flightParams, setFlightParams] = useState<FlightSearchParams & { returnDate: string, children: number, infant: number, cabin: string, name: string, email: string, phone: string }>({
         origin: "DEL",
         destination: "BOM",
-        departureDate: "2026-03-20",
-        returnDate: "2026-03-25",
+        departureDate: todayIso,
+        returnDate: defaultReturnIso,
         adults: 1,
         children: 0,
         infant: 0,
@@ -211,6 +215,7 @@ export default function SearchForm({ onResults, onSearchStart, onError, autoSear
                                         <CalendarOverlay
                                             onSelect={(d) => handleDateSelect(d, 'departure')}
                                             selected={flightParams.departureDate}
+                                            minDate={todayIso}
                                             onClose={() => setShowDeparturePicker(false)}
                                         />
                                     )}
