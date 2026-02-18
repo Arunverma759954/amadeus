@@ -48,7 +48,7 @@ const Header = ({ sidebarOpen, setSidebarOpen }) => {
             )}
 
             <header className="sticky top-0 z-40 flex w-full border-b border-slate-200 bg-white/80 backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/80">
-                <div className="flex flex-grow items-center justify-between px-8 py-5">
+                <div className="flex flex-grow items-center justify-between gap-2 px-4 sm:px-6 md:px-8 py-3 md:py-5">
                     <div className="flex items-center gap-4 lg:hidden">
                         <button
                             onClick={(e) => {
@@ -61,19 +61,19 @@ const Header = ({ sidebarOpen, setSidebarOpen }) => {
                         </button>
                     </div>
 
-                    <div className="hidden sm:block">
-                        <div className="relative group">
-                            <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" />
+                    <div className="hidden sm:block flex-1 max-w-xs md:max-w-sm lg:max-w-md mx-2">
+                        <div className="relative group w-full">
+                            <Search className="absolute left-3 top-1/2 h-4 w-4 md:h-5 md:w-5 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors" />
                             <input
                                 type="text"
-                                placeholder="Search everything..."
-                                className="w-96 rounded-full border border-slate-200 bg-slate-50 py-3 pl-12 pr-6 text-base outline-none transition-all focus:border-indigo-600 focus:bg-white focus:ring-4 focus:ring-indigo-50 dark:border-slate-800 dark:bg-slate-800/50 dark:text-white dark:focus:border-indigo-500 dark:focus:ring-indigo-500/10 dark:focus:bg-slate-800"
+                                placeholder="Search..."
+                                className="w-full rounded-full border border-slate-200 bg-slate-50 py-2.5 md:py-3 pl-10 md:pl-12 pr-4 text-sm md:text-base outline-none transition-all focus:border-indigo-600 focus:bg-white focus:ring-2 focus:ring-indigo-50 dark:border-slate-800 dark:bg-slate-800/50 dark:text-white dark:focus:border-indigo-500 dark:focus:ring-indigo-500/10 dark:focus:bg-slate-800"
                             />
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-6">
-                        <div className="flex items-center gap-3 border-r border-slate-200 pr-6 dark:border-slate-800">
+                        <div className="flex items-center gap-2 sm:gap-4 md:gap-6 shrink-0">
+                        <div className="flex items-center gap-1 sm:gap-3 border-r border-slate-200 pr-3 sm:pr-6 dark:border-slate-800">
                             {/* Theme Toggler */}
                             <button
                                 onClick={() => setColorMode(colorMode === 'light' ? 'dark' : 'light')}

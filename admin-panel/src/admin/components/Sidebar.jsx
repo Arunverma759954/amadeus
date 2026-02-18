@@ -34,19 +34,19 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
 
     return (
         <aside
-            className={`absolute left-0 top-0 z-50 flex h-screen w-80 flex-col overflow-y-hidden border-r border-slate-200 bg-white duration-300 ease-linear dark:border-slate-800 dark:bg-slate-900 lg:static lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
+            className={`absolute left-0 top-0 z-50 flex h-screen w-[280px] sm:w-80 flex-col overflow-y-auto overflow-x-hidden border-r border-slate-200 bg-white duration-300 ease-linear dark:border-slate-800 dark:bg-slate-900 lg:static lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
         >
             {/* <!-- SIDEBAR HEADER --> */}
-            <div className="flex items-center justify-between px-8 py-8">
+            <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-5 sm:py-8 shrink-0">
                 <NavLink to="/admin" className="flex items-center gap-4">
                     <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-600 shadow-xl shadow-indigo-200 dark:shadow-none">
                         <Plane className="h-7 w-7 text-white" />
                     </div>
-                    <div>
-                        <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+                    <div className="min-w-0">
+                        <h1 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight text-slate-900 dark:text-white truncate">
                             Amadeus <span className="text-indigo-600">Admin</span>
                         </h1>
-                        <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">
+                        <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-slate-400">
                             Voyage Management
                         </p>
                     </div>

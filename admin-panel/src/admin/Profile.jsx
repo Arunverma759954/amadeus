@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Breadcrumb } from './components/Breadcrumb';
-import { Mail, Phone, MapPin, Briefcase, Link as LinkIcon, Twitter, Facebook, Linkedin, Camera } from 'lucide-react';
+import { Mail, Phone, MapPin, Briefcase, Link as LinkIcon, Twitter, Facebook, Linkedin, Camera, Calendar } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 const Profile = () => {
     const [user, setUser] = useState({
@@ -12,14 +13,58 @@ const Profile = () => {
         location: 'New Delhi, India',
         posts: '25',
         followers: '1.2K',
-        following: '450'
+        following: '450',
+        lastLogin: null,
+        createdAt: null
     });
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-            setUser(prev => ({ ...prev, ...JSON.parse(storedUser) }));
-        }
+        const fetchAdminProfile = async () => {
+            try {
+                const { data: { user: authUser } } = await supabase.auth.getUser();
+                if (authUser) {
+                    // Try to fetch from profiles table
+                    const { data: profileData } = await supabase
+                        .from('profiles')
+                        .select('*')
+                        .eq('id', authUser.id)
+                        .single();
+
+                    const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
+
+                    setUser({
+                        name: profileData?.full_name || storedUser.name || authUser.user_metadata?.full_name || authUser.email?.split('@')[0] || 'Admin',
+                        role: storedUser.role || 'Super Admin',
+                        email: authUser.email || storedUser.email || '',
+                        avatar: profileData?.avatar_url || storedUser.avatar || authUser.user_metadata?.avatar_url || 'https://i.pinimg.com/564x/7f/6c/64/7f6c64f2d6c4f7f1f8c6f5c2cda6a0c4.jpg',
+                        phone: profileData?.phone || storedUser.phone || '+91 98765 43210',
+                        location: profileData?.location || storedUser.location || 'New Delhi, India',
+                        posts: profileData?.posts_count || storedUser.posts || '25',
+                        followers: profileData?.followers_count || storedUser.followers || '1.2K',
+                        following: profileData?.following_count || storedUser.following || '450',
+                        lastLogin: authUser.last_sign_in_at || storedUser.lastLogin || null,
+                        createdAt: authUser.created_at || profileData?.created_at || null
+                    });
+                } else {
+                    // Fallback to localStorage
+                    const storedUser = localStorage.getItem('user');
+                    if (storedUser) {
+                        setUser(prev => ({ ...prev, ...JSON.parse(storedUser) }));
+                    }
+                }
+            } catch (err) {
+                console.error('Error fetching admin profile:', err);
+                const storedUser = localStorage.getItem('user');
+                if (storedUser) {
+                    setUser(prev => ({ ...prev, ...JSON.parse(storedUser) }));
+                }
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchAdminProfile();
     }, []);
 
     return (
@@ -74,21 +119,21 @@ const Profile = () => {
                         <div className="mx-auto mt-4 mb-8 grid max-w-sm grid-cols-3 divide-x divide-slate-200 dark:divide-slate-700 rounded-xl border border-slate-200 bg-slate-50 py-3 shadow-sm dark:border-slate-800 dark:bg-slate-800/50">
                             <div className="flex flex-col items-center justify-center gap-1 px-4">
                                 <span className="font-bold text-slate-900 dark:text-white text-lg">
-                                    {user.posts || '25'}
+                                    {user.posts || '0'}
                                 </span>
-                                <span className="text-xs text-slate-500 font-medium uppercase tracking-wide">Posts</span>
+                                <span className="text-xs text-slate-500 font-medium uppercase tracking-wide">Activity</span>
                             </div>
                             <div className="flex flex-col items-center justify-center gap-1 px-4">
                                 <span className="font-bold text-slate-900 dark:text-white text-lg">
-                                    {user.followers || '1.2K'}
+                                    {user.followers || '0'}
                                 </span>
-                                <span className="text-xs text-slate-500 font-medium uppercase tracking-wide">Followers</span>
+                                <span className="text-xs text-slate-500 font-medium uppercase tracking-wide">Managed</span>
                             </div>
                             <div className="flex flex-col items-center justify-center gap-1 px-4">
                                 <span className="font-bold text-slate-900 dark:text-white text-lg">
-                                    {user.following || '450'}
+                                    {user.following || '0'}
                                 </span>
-                                <span className="text-xs text-slate-500 font-medium uppercase tracking-wide">Following</span>
+                                <span className="text-xs text-slate-500 font-medium uppercase tracking-wide">Tasks</span>
                             </div>
                         </div>
 
@@ -138,13 +183,28 @@ const Profile = () => {
 
                             <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border border-transparent hover:border-slate-200 dark:hover:border-slate-700">
                                 <div className="flex items-center justify-center h-10 w-10 rounded-full bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">
-                                    <LinkIcon className="h-5 w-5" />
+                                    <Calendar className="h-5 w-5" />
                                 </div>
                                 <div>
-                                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-0.5">Website</p>
-                                    <p className="font-medium text-sm text-slate-900 dark:text-white">amadeus-admin.com</p>
+                                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-0.5">Last Login</p>
+                                    <p className="font-medium text-sm text-slate-900 dark:text-white">
+                                        {user.lastLogin ? new Date(user.lastLogin).toLocaleString() : 'Just now'}
+                                    </p>
                                 </div>
                             </div>
+                            {user.createdAt && (
+                                <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border border-transparent hover:border-slate-200 dark:hover:border-slate-700">
+                                    <div className="flex items-center justify-center h-10 w-10 rounded-full bg-indigo-100 text-indigo-600 dark:bg-indigo-900/30 dark:text-indigo-400">
+                                        <LinkIcon className="h-5 w-5" />
+                                    </div>
+                                    <div>
+                                        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-0.5">Member Since</p>
+                                        <p className="font-medium text-sm text-slate-900 dark:text-white">
+                                            {new Date(user.createdAt).toLocaleDateString()}
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                         {/* Social Links */}

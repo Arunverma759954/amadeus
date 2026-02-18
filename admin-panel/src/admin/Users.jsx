@@ -11,46 +11,90 @@ const Users = () => {
 
     useEffect(() => {
         const fetchUsers = async () => {
-            // We fetch from 'bookings' to get users who have interacted, 
-            // since direct auth.users access is restricted in the client.
-            const { data, error } = await supabase
+            // Fetch real users from profiles table (excluding admins)
+            const { data: profilesData, error: profilesError } = await supabase
+                .from('profiles')
+                .select('*')
+                .eq('is_admin', false)
+                .order('created_at', { ascending: false });
+
+            // Also fetch bookings to show user activity
+            const { data: bookingsData } = await supabase
                 .from('bookings')
                 .select('*')
                 .order('created_at', { ascending: false });
 
-            if (!error && data) {
-                // Group by user_id to show unique passengers
-                const uniqueUsers = [];
-                const seen = new Set();
-                data.forEach(item => {
-                    const userId = item.user_id || "GUEST";
-                    if (!seen.has(userId)) {
-                        seen.add(userId);
-                        uniqueUsers.push({
-                            id: userId.substring(0, 8),
-                            name: item.user_id ? `User ${item.user_id.substring(0, 4)}` : "Guest Passenger",
-                            email: item.user_id ? `user.${item.user_id.substring(0, 4)}@example.com` : "guest@vistor.com",
-                            img: `https://i.pravatar.cc/150?u=${item.user_id || 'guest'}`,
-                            trip: item.flight_details ? `${item.flight_details.origin} - ${item.flight_details.destination}` : "No Trip Info",
-                            date: new Date(item.created_at).toLocaleDateString(),
-                            status: item.status
-                        });
-                    }
+            if (!profilesError && profilesData) {
+                // Map profiles to users with booking info
+                const usersList = profilesData.map(profile => {
+                    // Find user's latest booking
+                    const userBookings = bookingsData?.filter(b => b.user_id === profile.id) || [];
+                    const latestBooking = userBookings[0];
+
+                    return {
+                        id: profile.id,
+                        name: profile.full_name || profile.name || profile.email?.split('@')[0] || 'User',
+                        email: profile.email || 'No email',
+                        img: profile.avatar_url || `https://i.pravatar.cc/150?u=${profile.id}`,
+                        trip: latestBooking?.flight_details ? `${latestBooking.flight_details.origin} - ${latestBooking.flight_details.destination}` : "No bookings yet",
+                        date: latestBooking ? new Date(latestBooking.created_at).toLocaleDateString() : new Date(profile.created_at).toLocaleDateString(),
+                        status: latestBooking?.status || 'Active',
+                        bookingsCount: userBookings.length,
+                        lastActivity: latestBooking?.created_at || profile.updated_at || profile.created_at
+                    };
                 });
-                setUsers(uniqueUsers);
+
+                setUsers(usersList);
+            } else {
+                // Fallback: if profiles table doesn't exist or has no data, use bookings
+                const { data: bookingsData } = await supabase
+                    .from('bookings')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (bookingsData) {
+                    const uniqueUsers = [];
+                    const seen = new Set();
+                    bookingsData.forEach(item => {
+                        const userId = item.user_id || "GUEST";
+                        if (!seen.has(userId)) {
+                            seen.add(userId);
+                            uniqueUsers.push({
+                                id: userId.substring(0, 8),
+                                name: item.user_id ? `User ${item.user_id.substring(0, 4)}` : "Guest Passenger",
+                                email: item.user_id ? `user.${item.user_id.substring(0, 4)}@example.com` : "guest@visitor.com",
+                                img: `https://i.pravatar.cc/150?u=${item.user_id || 'guest'}`,
+                                trip: item.flight_details ? `${item.flight_details.origin} - ${item.flight_details.destination}` : "No Trip Info",
+                                date: new Date(item.created_at).toLocaleDateString(),
+                                status: item.status,
+                                bookingsCount: 1
+                            });
+                        }
+                    });
+                    setUsers(uniqueUsers);
+                }
             }
             setLoading(false);
         };
 
         fetchUsers();
 
-        const channel = supabase
-            .channel('users_realtime')
+        const profilesChannel = supabase
+            .channel('users_profiles_realtime')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' },
+                () => fetchUsers())
+            .subscribe();
+
+        const bookingsChannel = supabase
+            .channel('users_bookings_realtime')
             .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'bookings' },
                 () => fetchUsers())
             .subscribe();
 
-        return () => supabase.removeChannel(channel);
+        return () => {
+            supabase.removeChannel(profilesChannel);
+            supabase.removeChannel(bookingsChannel);
+        };
     }, []);
 
     const filteredUsers = users.filter(user => {
@@ -164,8 +208,11 @@ const Users = () => {
                                             </div>
                                         </td>
                                         <td className="py-4 px-6">
-                                            <p className="font-mono text-xs font-bold text-slate-600 dark:text-slate-400">#{user.id}</p>
+                                            <p className="font-mono text-xs font-bold text-slate-600 dark:text-slate-400">#{user.id.substring(0, 8)}</p>
                                             <p className="text-sm font-medium text-slate-900 dark:text-white">{user.trip}</p>
+                                            {user.bookingsCount > 0 && (
+                                                <p className="text-[10px] text-slate-400 mt-0.5">{user.bookingsCount} booking{user.bookingsCount > 1 ? 's' : ''}</p>
+                                            )}
                                         </td>
                                         <td className="py-4 px-6">
                                             <p className="text-sm text-slate-600 dark:text-slate-400">{user.date}</p>

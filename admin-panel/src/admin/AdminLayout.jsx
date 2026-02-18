@@ -21,8 +21,8 @@ const AdminLayout = () => {
                     {/* <!-- ===== Header End ===== --> */}
 
                     {/* <!-- ===== Main Content Start ===== --> */}
-                    <main>
-                        <div className="mx-auto max-w-screen-2xl p-6 md:p-8 2xl:p-12">
+                    <main className="min-w-0">
+                        <div className="mx-auto max-w-screen-2xl w-full p-4 sm:p-6 md:p-8 2xl:p-12">
                             <Outlet />
                         </div>
                     </main>
