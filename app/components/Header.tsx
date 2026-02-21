@@ -44,7 +44,7 @@ export default function Header() {
       </div>
 
       {/* Contact Bar */}
-      <div className="bg-[#00308F] text-white py-1.5 px-4 shadow-lg border-b border-white/5 relative z-[1001]">
+      <div className="bg-[#00308F] text-white py-1.5 px-4 shadow-lg border-b border-white/5 relative z-1001">
         <div className="max-w-7xl mx-auto flex flex-row justify-between items-center gap-2 text-[10px] md:text-[12px]">
           <div className="flex items-center gap-3 md:gap-12 overflow-x-auto no-scrollbar">
             <a
@@ -59,7 +59,7 @@ export default function Header() {
                 info@hifitravels.com.au
               </span>
             </a>
-            <div className="h-3 w-[1px] bg-white/20 shrink-0"></div>
+            <div className="h-3 w-px bg-white/20 shrink-0"></div>
             <a
               href="tel:+61730678999"
               className="flex items-center gap-1.5 hover:text-white group transition-all duration-300 shrink-0"
@@ -96,7 +96,7 @@ export default function Header() {
       </div>
 
       {/* Main Navbar */}
-      <div className="bg-white px-2 md:px-4 shadow-sm border-b border-gray-100 sticky top-0 z-[1000] backdrop-blur-md bg-white/95">
+      <div className="bg-white px-2 md:px-4 shadow-sm border-b border-gray-100 sticky top-0 z-1000 backdrop-blur-md">
         <div className="max-w-7xl mx-auto flex justify-between items-center h-16 md:h-20 lg:h-22">
           {/* Logo */}
           <div className="flex items-center">
@@ -164,7 +164,7 @@ export default function Header() {
                 />
               </button>
               {/* Dropdown Menu */}
-              <div className="absolute top-[100%] left-0 w-72 bg-white shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible translate-y-1 transition-all duration-300 z-[1100] border-t-4 border-[#C41E22] rounded-none overflow-hidden">
+              <div className="absolute top-full left-0 w-72 bg-white shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible translate-y-1 transition-all duration-300 z-1100 border-t-4 border-[#C41E22] rounded-none overflow-hidden">
                 <Link
                   href="/group-travel"
                   className="block px-8 py-4 text-[#071C4B] hover:bg-gray-50 hover:text-[#C41E22] font-bold transition-all border-b border-gray-100 uppercase text-[11px] tracking-widest"
@@ -209,7 +209,7 @@ export default function Header() {
 
       {/* Mobile Navigation Drawer - MOVED to top level of Header for proper layering */}
       <div
-        className={`fixed inset-0 bg-white z-[5000] flex flex-col transition-all duration-500 ease-in-out ${isMenuOpen ? "opacity-100 translate-x-0" : "opacity-0 translate-x-full pointer-events-none"} md:hidden`}
+        className={`fixed inset-0 bg-white z-5000 flex flex-col transition-all duration-500 ease-in-out ${isMenuOpen ? "opacity-100 translate-x-0" : "opacity-0 translate-x-full pointer-events-none"} md:hidden`}
       >
         {/* Drawer Header */}
         <div className="p-6 flex justify-between items-center border-b border-gray-100 bg-white sticky top-0 z-10">

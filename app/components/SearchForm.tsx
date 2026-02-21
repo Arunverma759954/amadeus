@@ -215,8 +215,8 @@ export default function SearchForm({
           </div>
 
           {/* Form Container */}
-          <div className="bg-white px-3 sm:px-5 md:px-10 pt-4 pb-5 md:pt-6 md:pb-8 rounded-b-2xl relative">
-            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+          <div className="bg-white px-3 sm:px-5 md:px-10 pt-3 pb-3 md:pt-6 md:pb-8 rounded-b-2xl relative">
+            <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-5">
               {/* Trip Type */}
               <div className="flex items-center justify-start gap-5 md:gap-8 text-gray-800 text-sm font-semibold overflow-x-auto no-scrollbar pb-1 mt-1">
                 {["round", "oneway"].map((type) => (
@@ -379,7 +379,7 @@ export default function SearchForm({
                 />
               </div>
 
-              <div className="flex justify-center sm:justify-end pt-3">
+              <div className="flex justify-center sm:justify-end pt-1 sm:pt-3">
                 <button
                   id="search-submit-btn"
                   type="submit"
@@ -388,7 +388,7 @@ export default function SearchForm({
                                     ${
                                       loading || !isFormValid
                                         ? "bg-gray-300 cursor-not-allowed text-gray-500"
-                                        : "bg-gradient-to-r from-[#f6405f] to-[#ff6b81] hover:shadow-2xl hover:scale-105 text-white"
+                                        : "bg-linear-to-r from-[#f6405f] to-[#ff6b81] hover:shadow-2xl hover:scale-105 text-white"
                                     }`}
                 >
                   {loading ? "Searching..." : "Find a Deal"}
@@ -717,7 +717,7 @@ function InputField({
       )}
 
       {enableAirportAutocomplete && (open || loading) && (
-        <ul className="absolute top-full left-0 right-0 mt-2 min-w-[min(100%,450px)] w-full bg-white border border-gray-100 rounded-xl shadow-[0_15px_50px_rgba(0,0,0,0.15)] overflow-y-auto z-[200] py-2 text-left">
+        <ul className="absolute top-full left-0 right-0 mt-2 min-w-[min(100%,450px)] w-full bg-white border border-gray-100 rounded-xl shadow-[0_15px_50px_rgba(0,0,0,0.15)] overflow-y-auto z-200 py-2 text-left">
           {loading && options.length === 0 ? (
             <li className="px-6 py-4 text-sm font-medium text-gray-400">
               Searching...
@@ -779,7 +779,7 @@ function SelectField({ name, icon, label, value, onChange, options }: any) {
           </option>
         ))}
       </select>
-      <div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-300 pointer-events-none">
+      <div className="absolute top-1/2 left-4 -translate-y-1/2 z-100 pointer-events-none">
         <FaChevronDown size={10} />
       </div>
     </div>
@@ -877,7 +877,7 @@ function CalendarOverlay({
   };
 
   return (
-    <div className="absolute top-[calc(100%+12px)] left-1/2 -translate-x-1/2 md:left-auto md:right-0 md:translate-x-0 bg-white shadow-[0_25px_50px_-12px_rgba(0,0,0,0.3)] z-[100] w-[calc(100vw-40px)] sm:w-[380px] border border-gray-100 p-4 sm:p-6 animate-in fade-in slide-in-from-top-4 duration-300 rounded-2xl">
+    <div className="absolute top-[calc(100%+12px)] left-1/2 -translate-x-1/2 md:left-auto md:right-0 md:translate-x-0 bg-white shadow-[0_25px_50px_-12px_rgba(0,0,0,0.3)] z-100 w-[calc(100vw-40px)] sm:w-[380px] border border-gray-100 p-4 sm:p-6 animate-in fade-in slide-in-from-top-4 duration-300 rounded-2xl">
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <button

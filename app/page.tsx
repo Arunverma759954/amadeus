@@ -772,7 +772,7 @@ export default function Home() {
       <Header />
 
       {/* Hero */}
-      <section className="relative overflow-visible">
+      <section className="relative overflow-visible z-50">
         <HeroSlider>
           <div className="w-full max-w-7xl mx-auto">
             <SearchForm
@@ -894,7 +894,7 @@ export default function Home() {
           <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center mb-6 md:mb-10 text-[#071C4B] uppercase tracking-tighter">
             Top Recommended Destinations
           </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5 md:gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
             {topDestinations.map((item, idx) => (
               <div
                 key={idx}
@@ -1037,7 +1037,7 @@ export default function Home() {
             <button className="hidden md:flex w-8 h-8 rounded-full border border-gray-200 items-center justify-center text-gray-500 hover:bg-gray-50 shrink-0">
               <FaChevronLeft size={14} />
             </button>
-            <div className="flex items-center gap-5 sm:gap-8 md:gap-12 overflow-x-auto no-scrollbar justify-start md:justify-center flex-1 py-1 px-1 md:px-4">
+            <div className="flex items-center gap-5 sm:gap-8 md:gap-12 overflow-x-auto no-scrollbar justify-start md:justify-center flex-1 py-1 px-1 md:px-4 scroll-smooth snap-x">
               {[
                 "QANTAS",
                 "THAI",
@@ -1120,7 +1120,7 @@ export default function Home() {
           <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center mb-6 md:mb-10 text-[#071C4B] uppercase tracking-tighter">
             Popular Destinations
           </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2 sm:gap-4 md:gap-6">
             {[
               { name: "Adelaide", img: "/1.jpg" },
               { name: "Brisbane", img: "/2.jpg" },
