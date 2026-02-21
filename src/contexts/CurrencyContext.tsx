@@ -3,13 +3,9 @@
 import React, { createContext, useContext, useMemo, useState, useEffect } from "react";
 import type { DisplayCurrency } from "@/src/lib/currency";
 
+// For now we always display prices in AUD (single dollar currency).
+// Locale-based switching (INR/USD) is disabled.
 function getDisplayCurrencyFromLocale(): DisplayCurrency {
-    if (typeof navigator === "undefined") return "AUD";
-    const lang = navigator.language || (navigator as any).userLanguage || "";
-    const tag = lang.toLowerCase();
-    if (tag.startsWith("en-in") || tag.startsWith("hi")) return "INR";
-    if (tag.startsWith("en-au")) return "AUD";
-    if (tag.startsWith("en-us") || tag.startsWith("en-gb")) return "USD";
     return "AUD";
 }
 
@@ -25,15 +21,19 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
-        const detected = getDisplayCurrencyFromLocale();
+        // Always use AUD regardless of locale or previous stored value.
         const stored = (typeof localStorage !== "undefined" && localStorage.getItem("displayCurrency")) as DisplayCurrency | null;
-        setDisplayCurrencyState(stored && ["AUD", "INR", "USD"].includes(stored) ? stored : detected);
+        const initial: DisplayCurrency = stored === "AUD" ? "AUD" : "AUD";
+        setDisplayCurrencyState(initial);
+        if (typeof localStorage !== "undefined") localStorage.setItem("displayCurrency", initial);
         setMounted(true);
     }, []);
 
     const setDisplayCurrency = (c: DisplayCurrency) => {
-        setDisplayCurrencyState(c);
-        if (typeof localStorage !== "undefined") localStorage.setItem("displayCurrency", c);
+        // Clamp to AUD so UI never switches to INR/USD.
+        const safe: DisplayCurrency = "AUD";
+        setDisplayCurrencyState(safe);
+        if (typeof localStorage !== "undefined") localStorage.setItem("displayCurrency", safe);
     };
 
     const value = useMemo(

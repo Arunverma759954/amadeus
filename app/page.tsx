@@ -15,8 +15,25 @@ import SearchingOverlay from "./components/SearchingOverlay";
 import { supabase } from "@/src/lib/supabase";
 import { searchFlights } from "@/src/lib/flights";
 import { FaChevronDown, FaWhatsapp, FaPhoneAlt, FaCheckCircle, FaStar, FaGoogle, FaChevronLeft, FaChevronRight, FaDollarSign, FaThumbsUp, FaMedal, FaArrowLeft, FaPlane, FaSearch, FaTimes, FaArrowUp } from "react-icons/fa";
-import { formatCurrency, isIndiaRoute } from "@/src/lib/currency";
+import { formatCurrency } from "@/src/lib/currency";
 import { useDisplayCurrency } from "@/src/contexts/CurrencyContext";
+
+type TopDestination = {
+    city: string;
+    price: string;
+    image: string;
+};
+
+const DEFAULT_TOP_DESTINATIONS: TopDestination[] = [
+    { city: "London, UK", price: "From $339 r/t", image: "/OIP.webp" },
+    { city: "Paris, France", price: "From $477 r/t", image: "/OIP (1).webp" },
+    { city: "Rome, Italy", price: "From $479 r/t", image: "/OIP (2).webp" },
+    { city: "Frankfurt, Germany", price: "From $545 r/t", image: "/OIP (3).webp" },
+    { city: "Dubai, UAE", price: "From $610 r/t", image: "/OIP (4).webp" },
+    { city: "Singapore", price: "From $520 r/t", image: "/OIP (5).webp" },
+    { city: "Tokyo, Japan", price: "From $780 r/t", image: "/OIP (6).webp" },
+    { city: "New York, USA", price: "From $890 r/t", image: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?q=80&w=800&auto=format&fit=crop" },
+];
 
 export default function Home() {
     const { displayCurrency } = useDisplayCurrency();
@@ -39,11 +56,9 @@ export default function Home() {
     const [showFilters, setShowFilters] = useState(false);
     const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
     const [searchParams, setSearchParams] = useState<any>(null); // Store current search params for slider use
-    // India–India route (e.g. Delhi–Ahmedabad) → show INR; else use locale-based currency (AUD/USD)
-    const isIndia = isIndiaRoute(searchParams?.origin, searchParams?.destination);
-    const effectiveCurrency = isIndia ? "INR" : displayCurrency;
     const searchCache = useRef<Record<string, any>>({});
     const [showScrollTop, setShowScrollTop] = useState(false);
+    const [topDestinations, setTopDestinations] = useState<TopDestination[]>(DEFAULT_TOP_DESTINATIONS);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -105,6 +120,30 @@ export default function Home() {
             supabase.removeChannel(channel);
             clearInterval(pollInterval);
         };
+    }, []);
+
+    // Load \"Top Recommended Destinations\" cards from site_content (admin panel)
+    useEffect(() => {
+        const fetchTopDestinations = async () => {
+            try {
+                const { data, error } = await supabase
+                    .from('site_content')
+                    .select('content_value')
+                    .eq('content_key', 'top_destinations')
+                    .single();
+
+                if (!error && data?.content_value) {
+                    const parsed = JSON.parse(data.content_value);
+                    if (Array.isArray(parsed)) {
+                        setTopDestinations(parsed as TopDestination[]);
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to load top_destinations content", err);
+            }
+        };
+
+        fetchTopDestinations();
     }, []);
 
     const handleSearchStart = () => {
@@ -352,7 +391,7 @@ export default function Home() {
                                         <div className="flex justify-between items-center">
                                             <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Max Budget</h4>
                                             <span className="text-[10px] font-black text-[#071C4B] bg-blue-50 px-2 py-0.5 rounded">
-                                                {formatCurrency((maxPrice || 0), 'AUD', effectiveCurrency)}
+                                                {formatCurrency((maxPrice || 0), 'AUD', displayCurrency)}
                                             </span>
                                         </div>
                                         <input
@@ -454,7 +493,7 @@ export default function Home() {
                                                     </span>
                                                     <span className="text-base md:text-lg font-black leading-none mb-1 tabular-nums">{date.getDate()}</span>
                                                     <span className={`text-[8px] font-bold ${isSelected ? 'text-white/90' : 'text-emerald-600'}`}>
-                                                        {formatCurrency(estP, 'AUD', effectiveCurrency)}
+                                                        {formatCurrency(estP, 'AUD', displayCurrency)}
                                                     </span>
                                                 </button>
                                             );
@@ -548,7 +587,7 @@ export default function Home() {
                                                     onViewDetails={handleBookingClick}
                                                     badge={badgeForFirst}
                                                     variant={index % 2 === 1 ? 'alt' : 'default'}
-                                                    displayCurrency={effectiveCurrency}
+                                                    displayCurrency={displayCurrency}
                                                 />
                                             );
                                         })
@@ -674,16 +713,7 @@ export default function Home() {
                         Top Recommended Destinations
                     </h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
-                        {[
-                            { city: "London, UK", price: "From $339 r/t", image: "/OIP.webp" },
-                            { city: "Paris, France", price: "From $477 r/t", image: "/OIP (1).webp" },
-                            { city: "Rome, Italy", price: "From $479 r/t", image: "/OIP (2).webp" },
-                            { city: "Frankfurt, Germany", price: "From $545 r/t", image: "/OIP (3).webp" },
-                            { city: "Dubai, UAE", price: "From $610 r/t", image: "/OIP (4).webp" },
-                            { city: "Singapore", price: "From $520 r/t", image: "/OIP (5).webp" },
-                            { city: "Tokyo, Japan", price: "From $780 r/t", image: "/OIP (6).webp" },
-                            { city: "New York, USA", price: "From $890 r/t", image: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?q=80&w=800&auto=format&fit=crop" },
-                        ].map((item, idx) => (
+                        {topDestinations.map((item, idx) => (
                             <div
                                 key={idx}
                                 className="relative group overflow-hidden rounded-sm shadow-[0_8px_24px_rgba(0,0,0,0.2)] cursor-pointer"
