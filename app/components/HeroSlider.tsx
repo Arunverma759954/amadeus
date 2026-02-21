@@ -32,7 +32,7 @@ export default function HeroSlider({
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
 
   return (
-    <div className="relative w-full h-[300px] sm:h-[420px] md:h-[560px] lg:h-[700px] overflow-hidden font-sans">
+    <div className="relative w-full h-[240px] sm:h-[380px] md:h-[520px] lg:h-[680px] overflow-hidden font-sans">
       {/* Slides */}
       {slides.map((src, index) => {
         // Calculate position classes for sliding effect
@@ -106,23 +106,43 @@ export default function HeroSlider({
       {/* Controls */}
       <button
         onClick={prevSlide}
-        className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 bg-black/20 hover:bg-black/40 text-white p-2 md:p-3 rounded-full z-40 transition-colors"
+        aria-label="Previous slide"
+        className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2.5 md:p-3 rounded-full z-40 transition-colors touch-manipulation"
       >
-        <FaChevronLeft size={18} className="md:hidden" />
-        <FaChevronLeft size={30} className="hidden md:block" />
+        <FaChevronLeft size={14} className="md:hidden" />
+        <FaChevronLeft size={22} className="hidden md:block" />
       </button>
       <button
         onClick={nextSlide}
-        className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 bg-black/20 hover:bg-black/40 text-white p-2 md:p-3 rounded-full z-40 transition-colors"
+        aria-label="Next slide"
+        className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/50 text-white p-2.5 md:p-3 rounded-full z-40 transition-colors touch-manipulation"
       >
-        <FaChevronRight size={18} className="md:hidden" />
-        <FaChevronRight size={30} className="hidden md:block" />
+        <FaChevronRight size={14} className="md:hidden" />
+        <FaChevronRight size={22} className="hidden md:block" />
       </button>
 
-      {/* Search Form Container */}
-      <div className="absolute bottom-4 sm:bottom-10 md:bottom-16 left-0 w-full z-40 pointer-events-auto px-3 sm:px-4">
-        {children}
+      {/* Dot indicators - mobile only */}
+      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-40 md:hidden">
+        {slides.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => setCurrentSlide(i)}
+            aria-label={`Go to slide ${i + 1}`}
+            className={`rounded-full transition-all duration-300 touch-manipulation ${
+              i === currentSlide
+                ? "w-5 h-1.5 bg-white"
+                : "w-1.5 h-1.5 bg-white/50"
+            }`}
+          />
+        ))}
       </div>
+
+      {/* Search Form Container (if passed as children) */}
+      {children && (
+        <div className="absolute bottom-4 sm:bottom-8 md:bottom-14 left-0 w-full z-40 pointer-events-auto px-3 sm:px-4">
+          {children}
+        </div>
+      )}
     </div>
   );
 }

@@ -14,1060 +14,1295 @@ import DetailsModal from "./components/DetailsModal";
 import SearchingOverlay from "./components/SearchingOverlay";
 import { supabase } from "@/src/lib/supabase";
 import { searchFlights } from "@/src/lib/flights";
-import { FaChevronDown, FaWhatsapp, FaPhoneAlt, FaCheckCircle, FaStar, FaGoogle, FaChevronLeft, FaChevronRight, FaDollarSign, FaThumbsUp, FaMedal, FaArrowLeft, FaPlane, FaSearch, FaTimes, FaArrowUp } from "react-icons/fa";
+import {
+  FaChevronDown,
+  FaWhatsapp,
+  FaPhoneAlt,
+  FaCheckCircle,
+  FaStar,
+  FaGoogle,
+  FaChevronLeft,
+  FaChevronRight,
+  FaDollarSign,
+  FaThumbsUp,
+  FaMedal,
+  FaArrowLeft,
+  FaPlane,
+  FaSearch,
+  FaTimes,
+  FaArrowUp,
+} from "react-icons/fa";
 import { formatCurrency } from "@/src/lib/currency";
 import { useDisplayCurrency } from "@/src/contexts/CurrencyContext";
 
 type TopDestination = {
-    city: string;
-    price: string;
-    image: string;
+  city: string;
+  price: string;
+  image: string;
 };
 
 const DEFAULT_TOP_DESTINATIONS: TopDestination[] = [
-    { city: "London, UK", price: "From $339 r/t", image: "/OIP.webp" },
-    { city: "Paris, France", price: "From $477 r/t", image: "/OIP (1).webp" },
-    { city: "Rome, Italy", price: "From $479 r/t", image: "/OIP (2).webp" },
-    { city: "Frankfurt, Germany", price: "From $545 r/t", image: "/OIP (3).webp" },
-    { city: "Dubai, UAE", price: "From $610 r/t", image: "/OIP (4).webp" },
-    { city: "Singapore", price: "From $520 r/t", image: "/OIP (5).webp" },
-    { city: "Tokyo, Japan", price: "From $780 r/t", image: "/OIP (6).webp" },
-    { city: "New York, USA", price: "From $890 r/t", image: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?q=80&w=800&auto=format&fit=crop" },
+  { city: "London, UK", price: "From $339 r/t", image: "/OIP.webp" },
+  { city: "Paris, France", price: "From $477 r/t", image: "/OIP (1).webp" },
+  { city: "Rome, Italy", price: "From $479 r/t", image: "/OIP (2).webp" },
+  {
+    city: "Frankfurt, Germany",
+    price: "From $545 r/t",
+    image: "/OIP (3).webp",
+  },
+  { city: "Dubai, UAE", price: "From $610 r/t", image: "/OIP (4).webp" },
+  { city: "Singapore", price: "From $520 r/t", image: "/OIP (5).webp" },
+  { city: "Tokyo, Japan", price: "From $780 r/t", image: "/OIP (6).webp" },
+  {
+    city: "New York, USA",
+    price: "From $890 r/t",
+    image:
+      "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?q=80&w=800&auto=format&fit=crop",
+  },
 ];
 
 export default function Home() {
-    const { displayCurrency } = useDisplayCurrency();
-    const [results, setResults] = useState<any | null>(null);
-    const [dictionaries, setDictionaries] = useState<any>(null);
-    const [selectedFlight, setSelectedFlight] = useState<{ offer: FlightOffer, tab: 'details' | 'seats' | 'meals' } | null>(null);
-    const [loading, setLoading] = useState(false);
-    const [isRefreshing, setIsRefreshing] = useState(false);
-    const [errorToast, setErrorToast] = useState<string | null>(null);
-    const [resultType, setResultType] = useState<'flight' | 'hotel'>('flight');
-    const [user, setUser] = useState<any>(null);
-    const [pricingAdjustment, setPricingAdjustment] = useState(130); // Default to 130% if not set
-    const [sortBy, setSortBy] = useState<'recommendation' | 'price' | 'duration'>('recommendation');
-    const [selectedAirlines, setSelectedAirlines] = useState<string[]>([]);
-    const [maxStops, setMaxStops] = useState<number | null>(null);
-    const [timeSlots, setTimeSlots] = useState<string[]>([]);
-    const [refundableOnly, setRefundableOnly] = useState(false);
-    const [baggageOnly, setBaggageOnly] = useState(false);
-    const [maxPrice, setMaxPrice] = useState<number | null>(null);
-    const [showFilters, setShowFilters] = useState(false);
-    const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
-    const [searchParams, setSearchParams] = useState<any>(null); // Store current search params for slider use
-    const searchCache = useRef<Record<string, any>>({});
-    const [showScrollTop, setShowScrollTop] = useState(false);
-    const [topDestinations, setTopDestinations] = useState<TopDestination[]>(DEFAULT_TOP_DESTINATIONS);
+  const { displayCurrency } = useDisplayCurrency();
+  const [results, setResults] = useState<any | null>(null);
+  const [dictionaries, setDictionaries] = useState<any>(null);
+  const [selectedFlight, setSelectedFlight] = useState<{
+    offer: FlightOffer;
+    tab: "details" | "seats" | "meals";
+  } | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [errorToast, setErrorToast] = useState<string | null>(null);
+  const [resultType, setResultType] = useState<"flight" | "hotel">("flight");
+  const [user, setUser] = useState<any>(null);
+  const [pricingAdjustment, setPricingAdjustment] = useState(130); // Default to 130% if not set
+  const [sortBy, setSortBy] = useState<"recommendation" | "price" | "duration">(
+    "recommendation",
+  );
+  const [selectedAirlines, setSelectedAirlines] = useState<string[]>([]);
+  const [maxStops, setMaxStops] = useState<number | null>(null);
+  const [timeSlots, setTimeSlots] = useState<string[]>([]);
+  const [refundableOnly, setRefundableOnly] = useState(false);
+  const [baggageOnly, setBaggageOnly] = useState(false);
+  const [maxPrice, setMaxPrice] = useState<number | null>(null);
+  const [showFilters, setShowFilters] = useState(false);
+  const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
+  const [searchParams, setSearchParams] = useState<any>(null); // Store current search params for slider use
+  const searchCache = useRef<Record<string, any>>({});
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const [topDestinations, setTopDestinations] = useState<TopDestination[]>(
+    DEFAULT_TOP_DESTINATIONS,
+  );
 
-    useEffect(() => {
-        const handleScroll = () => {
-            setShowScrollTop(window.scrollY > 300);
-        };
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
-    }, []);
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowScrollTop(window.scrollY > 300);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
-    const scrollToTop = () => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  // Fetch user and offers
+  useEffect(() => {
+    const checkUser = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    checkUser();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Fetch pricing settings
+  useEffect(() => {
+    const fetchPricing = async () => {
+      const { data } = await supabase
+        .from("pricing_settings")
+        .select("markup_value")
+        .single();
+      if (data) {
+        console.log("💰 [PRICING] Syncing Markup:", data.markup_value + "%");
+        setPricingAdjustment(data.markup_value);
+      }
     };
 
-    // Fetch user and offers
-    useEffect(() => {
-        const checkUser = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            setUser(user);
-        };
-        checkUser();
+    // 1. Initial Fetch
+    fetchPricing();
 
-        const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-            setUser(session?.user ?? null);
-        });
+    // 2. Realtime Subscription (Best for Speed)
+    const channel = supabase
+      .channel("pricing_changes")
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "pricing_settings" },
+        (payload) => {
+          console.log(
+            "💰 [PRICING] Instant Update Received:",
+            payload.new.markup_value + "%",
+          );
+          setPricingAdjustment(payload.new.markup_value);
+        },
+      )
+      .subscribe();
 
-        return () => subscription.unsubscribe();
-    }, []);
+    // 3. Polling Fallback (Every 2 seconds - Just in case Realtime fails)
+    const pollInterval = setInterval(fetchPricing, 2000);
 
-    // Fetch pricing settings
-    useEffect(() => {
-        const fetchPricing = async () => {
-            const { data } = await supabase
-                .from('pricing_settings')
-                .select('markup_value')
-                .single();
-            if (data) {
-                console.log("💰 [PRICING] Syncing Markup:", data.markup_value + "%");
-                setPricingAdjustment(data.markup_value);
-            }
-        };
+    return () => {
+      supabase.removeChannel(channel);
+      clearInterval(pollInterval);
+    };
+  }, []);
 
-        // 1. Initial Fetch
-        fetchPricing();
+  // Load \"Top Recommended Destinations\" cards from site_content (admin panel)
+  useEffect(() => {
+    const fetchTopDestinations = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("site_content")
+          .select("content_value")
+          .eq("content_key", "top_destinations")
+          .single();
 
-        // 2. Realtime Subscription (Best for Speed)
-        const channel = supabase
-            .channel('pricing_changes')
-            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'pricing_settings' },
-                (payload) => {
-                    console.log("💰 [PRICING] Instant Update Received:", payload.new.markup_value + "%");
-                    setPricingAdjustment(payload.new.markup_value);
-                })
-            .subscribe();
-
-        // 3. Polling Fallback (Every 2 seconds - Just in case Realtime fails)
-        const pollInterval = setInterval(fetchPricing, 2000);
-
-        return () => {
-            supabase.removeChannel(channel);
-            clearInterval(pollInterval);
-        };
-    }, []);
-
-    // Load \"Top Recommended Destinations\" cards from site_content (admin panel)
-    useEffect(() => {
-        const fetchTopDestinations = async () => {
-            try {
-                const { data, error } = await supabase
-                    .from('site_content')
-                    .select('content_value')
-                    .eq('content_key', 'top_destinations')
-                    .single();
-
-                if (!error && data?.content_value) {
-                    const parsed = JSON.parse(data.content_value);
-                    if (Array.isArray(parsed)) {
-                        setTopDestinations(parsed as TopDestination[]);
-                    }
-                }
-            } catch (err) {
-                console.error("Failed to load top_destinations content", err);
-            }
-        };
-
-        fetchTopDestinations();
-    }, []);
-
-    const handleSearchStart = () => {
-        setLoading(true);
-        setResults(null);
-        setErrorToast(null);
+        if (!error && data?.content_value) {
+          const parsed = JSON.parse(data.content_value);
+          if (Array.isArray(parsed)) {
+            setTopDestinations(parsed as TopDestination[]);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load top_destinations content", err);
+      }
     };
 
-    const handleBack = () => {
-        setResults(null);
-        setLoading(false);
-    };
+    fetchTopDestinations();
+  }, []);
 
-    const handleResults = (data: any, type: 'flight' | 'hotel', params?: any) => {
-        const flights = data?.data || [];
-        setResults(flights);
-        if (type === 'flight') setDictionaries(data?.dictionaries);
-        setResultType(type);
-        setLoading(false);
-        setIsRefreshing(false);
-        if (params) setSearchParams(params);
+  const handleSearchStart = () => {
+    setLoading(true);
+    setResults(null);
+    setErrorToast(null);
+  };
 
-        // Auto-set max price based on new results (including markup)
-        if (flights.length > 0) {
-            const high = Math.max(...flights.map((r: any) => parseFloat(r.price.total)));
-            const adjustedHigh = high * (1 + (pricingAdjustment / 100));
-            setMaxPrice(Math.ceil(adjustedHigh));
-        }
-    };
+  const handleBack = () => {
+    setResults(null);
+    setLoading(false);
+  };
 
-    const handleError = (msg: string) => {
-        console.error("❌ Search Error:", msg);
-        setLoading(false);
-        setIsRefreshing(false);
-        setErrorToast(msg);
-        alert("Search Error: " + msg);
-    };
+  const handleResults = (data: any, type: "flight" | "hotel", params?: any) => {
+    const flights = data?.data || [];
+    setResults(flights);
+    if (type === "flight") setDictionaries(data?.dictionaries);
+    setResultType(type);
+    setLoading(false);
+    setIsRefreshing(false);
+    if (params) setSearchParams(params);
 
-    const handleDateChange = async (newDate: string) => {
-        if (!searchParams) return;
-        setIsRefreshing(true);
-        const updatedParams = { ...searchParams, departureDate: newDate };
-        setSearchParams(updatedParams);
+    // Auto-set max price based on new results (including markup)
+    if (flights.length > 0) {
+      const high = Math.max(
+        ...flights.map((r: any) => parseFloat(r.price.total)),
+      );
+      const adjustedHigh = high * (1 + pricingAdjustment / 100);
+      setMaxPrice(Math.ceil(adjustedHigh));
+    }
+  };
 
-        try {
-            const data = await searchFlights(updatedParams);
-            handleResults(data, 'flight', updatedParams);
-        } catch (err: any) {
-            handleError(err.message || "Date update failed");
-        } finally {
-            setIsRefreshing(false);
-        }
-    };
+  const handleError = (msg: string) => {
+    console.error("❌ Search Error:", msg);
+    setLoading(false);
+    setIsRefreshing(false);
+    setErrorToast(msg);
+    alert("Search Error: " + msg);
+  };
 
-    const router = useRouter();
+  const handleDateChange = async (newDate: string) => {
+    if (!searchParams) return;
+    setIsRefreshing(true);
+    const updatedParams = { ...searchParams, departureDate: newDate };
+    setSearchParams(updatedParams);
 
-    const handleBookingClick = async (offer: FlightOffer, tab: 'details' | 'seats' | 'meals' = 'details') => {
-        setSelectedFlight({ offer, tab });
+    try {
+      const data = await searchFlights(updatedParams);
+      handleResults(data, "flight", updatedParams);
+    } catch (err: any) {
+      handleError(err.message || "Date update failed");
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
-        // Save to localStorage for the payment page to consume
-        localStorage.setItem("selectedFlight", JSON.stringify({ offer, tab }));
+  const router = useRouter();
 
-        // Navigate to payment page
-        router.push("/payment");
+  const handleBookingClick = async (
+    offer: FlightOffer,
+    tab: "details" | "seats" | "meals" = "details",
+  ) => {
+    setSelectedFlight({ offer, tab });
 
-        try {
-            const { data: { user } } = await supabase.auth.getUser();
-            await supabase.from('bookings').insert({
-                user_id: user?.id || null,
-                flight_details: {
-                    id: offer.id,
-                    airline: dictionaries?.carriers?.[offer.itineraries[0].segments[0].carrierCode] || offer.itineraries[0].segments[0].carrierCode,
-                    origin: offer.itineraries[0].segments[0].departure.iataCode,
-                    destination: offer.itineraries[0].segments[offer.itineraries[0].segments.length - 1].arrival.iataCode,
-                    price: offer.price.total,
-                    currency: offer.price.currency
-                },
-                status: 'Pending'
-            });
-        } catch (err) {
-            console.error("Booking log failed", err);
-        }
-    };
+    // Save to localStorage for the payment page to consume
+    localStorage.setItem("selectedFlight", JSON.stringify({ offer, tab }));
 
-    // --- Memoized Filter Logic for "Instant" Filter Experience ---
-    const filteredResults = useMemo(() => {
-        if (!results) return [];
-        let fr = [...results];
+    // Navigate to payment page
+    router.push("/payment");
 
-        // 1. Filter by Airlines
-        if (selectedAirlines.length > 0) {
-            fr = fr.filter(item => selectedAirlines.includes(item.itineraries[0].segments[0].carrierCode));
-        }
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      await supabase.from("bookings").insert({
+        user_id: user?.id || null,
+        flight_details: {
+          id: offer.id,
+          airline:
+            dictionaries?.carriers?.[
+              offer.itineraries[0].segments[0].carrierCode
+            ] || offer.itineraries[0].segments[0].carrierCode,
+          origin: offer.itineraries[0].segments[0].departure.iataCode,
+          destination:
+            offer.itineraries[0].segments[
+              offer.itineraries[0].segments.length - 1
+            ].arrival.iataCode,
+          price: offer.price.total,
+          currency: offer.price.currency,
+        },
+        status: "Pending",
+      });
+    } catch (err) {
+      console.error("Booking log failed", err);
+    }
+  };
 
-        // 2. Filter by Stops
-        if (maxStops !== null) {
-            fr = fr.filter(item => (item.itineraries[0].segments.length - 1) <= maxStops);
-        }
+  // --- Memoized Filter Logic for "Instant" Filter Experience ---
+  const filteredResults = useMemo(() => {
+    if (!results) return [];
+    let fr = [...results];
 
-        // 3. Filter by Time Slots
-        if (timeSlots.length > 0) {
-            fr = fr.filter(item => {
-                const hour = new Date(item.itineraries[0].segments[0].departure.at).getHours();
-                if (timeSlots.includes('morning') && hour >= 6 && hour < 12) return true;
-                if (timeSlots.includes('afternoon') && hour >= 12 && hour < 18) return true;
-                if (timeSlots.includes('evening') && hour >= 18 && hour < 24) return true;
-                if (timeSlots.includes('night') && (hour >= 0 && hour < 6)) return true;
-                return false;
-            });
-        }
-
-        // 4. Filter by Baggage
-        if (baggageOnly) {
-            fr = fr.filter(item => {
-                const baggage = item.travelerPricings?.[0]?.fareDetailsBySegment?.[0]?.includedCheckedBags;
-                return baggage && (baggage.quantity > 0 || baggage.weight > 0);
-            });
-        }
-
-        // 5. Filter by Max Price
-        if (maxPrice !== null) {
-            fr = fr.filter(item => {
-                const adjusted = parseFloat(item.price.total) * (1 + (pricingAdjustment / 100));
-                return adjusted <= maxPrice;
-            });
-        }
-
-        // 6. Sort
-        if (sortBy === 'price') {
-            fr.sort((a, b) => parseFloat(a.price.total) - parseFloat(b.price.total));
-        } else if (sortBy === 'duration') {
-            fr.sort((a, b) => {
-                const getDur = (iso: string) => {
-                    const matches = iso.match(/PT(\d+H)?(\d+M)?/);
-                    const h = parseInt(matches?.[1]?.replace('H', '') || '0');
-                    const m = parseInt(matches?.[2]?.replace('M', '') || '0');
-                    return h * 60 + m;
-                };
-                return getDur(a.itineraries[0].duration) - getDur(b.itineraries[0].duration);
-            });
-        }
-
-        return fr;
-    }, [results, selectedAirlines, maxStops, timeSlots, baggageOnly, maxPrice, sortBy, pricingAdjustment]);
-
-    // Results View
-    if (loading) return <SearchingOverlay />;
-
-    if (results) {
-        return (
-            <main className="min-h-screen bg-[#F8FAFC] font-sans overflow-x-hidden">
-                <div className="sticky top-0 z-[1000] w-full bg-white shadow-md">
-                    <Header />
-                    <div className="bg-white border-t border-gray-100">
-                        <div className="w-full px-4 sm:px-6 lg:px-8 py-2 md:py-3">
-                            <ModifySearchForm
-                                initialParams={searchParams}
-                                markup={pricingAdjustment}
-                                onResults={(data, type, params) => {
-                                    handleResults(data, type, params);
-                                }}
-                                onSearchStart={handleSearchStart}
-                                onError={handleError}
-                            />
-                        </div>
-                    </div>
-                </div>
-
-                <div className="w-full px-4 sm:px-6 lg:px-8 py-5 md:py-8 bg-gradient-to-b from-gray-50/50 to-[#F8FAFC]">
-                    {/* Mobile Only: Quick Filter Button */}
-                    <div className="lg:hidden flex items-center justify-between gap-4 mb-4">
-                        <button
-                            onClick={() => setIsMobileFiltersOpen(true)}
-                            className="flex-1 bg-white border border-gray-200 rounded-xl py-3.5 px-4 flex items-center justify-center gap-2 text-sm font-bold text-[#071C4B] shadow-[0_2px_12px_rgba(7,28,75,0.06)]"
-                        >
-                            <FaSearch className="text-[#071C4B]" />
-                            Filters & Sort
-                        </button>
-                    </div>
-                    <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
-                        {/* Sidebar Filters (Desktop always, Mobile Drawer) */}
-                        <aside className={`${isMobileFiltersOpen ? 'fixed inset-0 z-[2000] bg-white p-6 overflow-y-auto block' : 'hidden'} lg:block w-full lg:w-72 shrink-0 space-y-6`}>
-                            <div className="lg:hidden flex justify-between items-center mb-6">
-                                <h2 className="text-xl font-black text-[#071C4B]">Filters</h2>
-                                <button onClick={() => setIsMobileFiltersOpen(false)} className="p-2 text-gray-400 hover:text-gray-600">
-                                    <FaTimes size={20} />
-                                </button>
-                            </div>
-
-                            <div className="bg-white rounded-2xl shadow-[0_2px_16px_rgba(7,28,75,0.06)] border border-gray-100 overflow-hidden sticky top-24">
-                                <div className="p-5 border-b border-gray-100 space-y-3 bg-gray-50/40">
-                                    <div className="flex justify-between items-center">
-                                        <h2 className="text-xs font-black text-[#071C4B] uppercase tracking-widest">Refine search</h2>
-                                        <button
-                                            onClick={() => {
-                                                setSelectedAirlines([]);
-                                                setMaxStops(null);
-                                                setTimeSlots([]);
-                                                setRefundableOnly(false);
-                                                setBaggageOnly(false);
-                                                setMaxPrice(null);
-                                            }}
-                                            className="text-[10px] font-bold text-[#071C4B] hover:underline uppercase"
-                                        >
-                                            Reset
-                                        </button>
-                                    </div>
-                                    <div className="flex flex-col gap-1 pt-2 border-t border-gray-100">
-                                        <span className="text-[10px] font-bold text-gray-500">Markup: {pricingAdjustment}%</span>
-                                        <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-1.5">
-                                            <span className="animate-pulse w-2 h-2 bg-emerald-500 rounded-full" />
-                                            Live pricing
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <div className="p-6 space-y-8 max-h-[calc(100vh-200px)] lg:max-h-[calc(100vh-200px)] overflow-y-auto no-scrollbar">
-                                    {/* Stops */}
-                                    <div className="space-y-4">
-                                        <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Total Stops</h4>
-                                        <div className="space-y-2">
-                                            {[
-                                                { label: 'Direct Only', value: 0 },
-                                                { label: '1 Stop or less', value: 1 },
-                                                { label: 'Any Stops', value: null },
-                                            ].map((stop) => (
-                                                <label key={stop.label} className="flex items-center gap-3 cursor-pointer group p-2 rounded-xl hover:bg-blue-50/50 transition-all border border-transparent hover:border-blue-100/50">
-                                                    <input
-                                                        type="radio"
-                                                        name="stops-side"
-                                                        checked={maxStops === stop.value}
-                                                        onChange={() => setMaxStops(stop.value)}
-                                                        className="w-4 h-4 accent-[#071C4B]"
-                                                    />
-                                                    <span className={`text-[11px] font-bold ${maxStops === stop.value ? 'text-[#071C4B]' : 'text-gray-500'}`}>
-                                                        {stop.label}
-                                                    </span>
-                                                </label>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    {/* Price Range */}
-                                    <div className="space-y-4">
-                                        <div className="flex justify-between items-center">
-                                            <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Max Budget</h4>
-                                            <span className="text-[10px] font-black text-[#071C4B] bg-blue-50 px-2 py-0.5 rounded">
-                                                {formatCurrency((maxPrice || 0), 'AUD', displayCurrency)}
-                                            </span>
-                                        </div>
-                                        <input
-                                            type="range"
-                                            min="0"
-                                            max={maxPrice ? Math.max(maxPrice, 10000) : 10000}
-                                            step="100"
-                                            value={maxPrice || 10000}
-                                            onChange={(e) => setMaxPrice(parseInt(e.target.value))}
-                                            className="w-full h-1.5 bg-gray-100 rounded-full appearance-none cursor-pointer accent-[#071C4B]"
-                                        />
-                                    </div>
-
-                                    {/* Time Slots */}
-                                    <div className="space-y-4">
-                                        <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Departure Time</h4>
-                                        <div className="grid grid-cols-2 gap-2">
-                                            {[
-                                                { id: 'morning', label: 'Morning', icon: '🌅' },
-                                                { id: 'afternoon', label: 'Afternoon', icon: '☀️' },
-                                                { id: 'evening', label: 'Evening', icon: '🌆' },
-                                                { id: 'night', label: 'Night', icon: '🌙' },
-                                            ].map((slot) => (
-                                                <button
-                                                    key={slot.id}
-                                                    onClick={() => setTimeSlots(prev => prev.includes(slot.id) ? prev.filter(s => s !== slot.id) : [...prev, slot.id])}
-                                                    className={`py-3 rounded-2xl border flex flex-col items-center gap-1 transition-all ${timeSlots.includes(slot.id) ? 'bg-[#071C4B] text-white border-[#071C4B] shadow-md shadow-blue-900/20' : 'bg-white text-gray-400 border-gray-100 hover:border-gray-300'
-                                                        }`}
-                                                >
-                                                    <span className="text-sm">{slot.icon}</span>
-                                                    <span className="text-[8px] font-black uppercase tracking-tighter">{slot.label}</span>
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    {/* Airlines */}
-                                    {dictionaries?.carriers && (
-                                        <div className="space-y-4 pt-4 border-t border-gray-50">
-                                            <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Preferred Airlines</h4>
-                                            <div className="space-y-2 max-h-48 overflow-y-auto pr-2 no-scrollbar">
-                                                {Object.entries(dictionaries.carriers).map(([code, name]: any) => (
-                                                    <label key={code} className="flex items-center gap-3 cursor-pointer group p-1.5 rounded-lg hover:bg-gray-50 transition-all">
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={selectedAirlines.includes(code)}
-                                                            onChange={() => setSelectedAirlines(prev => prev.includes(code) ? prev.filter(c => c !== code) : [...prev, code])}
-                                                            className="w-3.5 h-3.5 accent-[#071C4B]"
-                                                        />
-                                                        <span className="text-[11px] font-bold text-gray-500 group-hover:text-gray-700 truncate">{name}</span>
-                                                    </label>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {/* Mobile: Apply Button */}
-                                    <div className="lg:hidden pt-6">
-                                        <button
-                                            onClick={() => setIsMobileFiltersOpen(false)}
-                                            className="w-full bg-[#071C4B] text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest"
-                                        >
-                                            Apply Filters
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </aside>
-
-                        {/* RIGHT: Results & Sorting */}
-                        <div className="flex-1 space-y-6">
-                            {/* Date Selector */}
-                            <div className="bg-white rounded-2xl md:rounded-[1.25rem] shadow-[0_2px_16px_rgba(7,28,75,0.06)] border border-gray-100 p-2.5 overflow-x-auto no-scrollbar">
-                                <div className="flex gap-2 min-w-max md:min-w-0 md:flex-1">
-                                    {(() => {
-                                        // Do not show back dates – only today and future
-                                        const today = new Date();
-                                        today.setHours(0, 0, 0, 0);
-                                        const selectedDate = searchParams?.departureDate ? new Date(searchParams.departureDate) : today;
-                                        const startDate = selectedDate < today ? today : selectedDate;
-
-                                        return Array.from({ length: 7 }).map((_, i) => {
-                                            const date = new Date(startDate);
-                                            date.setDate(startDate.getDate() + i);
-                                            const ds = date.toISOString().split('T')[0];
-                                            const isSelected = ds === (searchParams?.departureDate);
-
-                                            const baseP = results?.length > 0 ? Math.min(...results.map((r: any) => parseFloat(r.price.total))) : 800;
-                                            const estP = Math.round(baseP * (1 + (pricingAdjustment / 100)) * (1 + (Math.random() * 0.1 - 0.05)));
-
-                                            return (
-                                                <button
-                                                    key={i}
-                                                    onClick={() => handleDateChange(ds)}
-                                                    className={`w-20 md:flex-1 py-3.5 md:py-4 flex flex-col items-center justify-center rounded-xl md:rounded-2xl transition-all duration-200 ${isSelected ? 'bg-[#071C4B] text-white shadow-lg shadow-[#071C4B]/25 ring-2 ring-[#071C4B]/20 scale-[1.02] z-10' : 'hover:bg-gray-50 text-gray-600 border border-transparent hover:border-gray-100'}`}
-                                                >
-                                                    <span className={`text-[8px] md:text-[9px] font-bold uppercase tracking-tight mb-0.5 ${isSelected ? 'text-white/70' : 'text-gray-400'}`}>
-                                                        {date.toLocaleDateString('en-US', { weekday: 'short' })}
-                                                    </span>
-                                                    <span className="text-base md:text-lg font-black leading-none mb-1 tabular-nums">{date.getDate()}</span>
-                                                    <span className={`text-[8px] font-bold ${isSelected ? 'text-white/90' : 'text-emerald-600'}`}>
-                                                        {formatCurrency(estP, 'AUD', displayCurrency)}
-                                                    </span>
-                                                </button>
-                                            );
-                                        });
-                                    })()}
-                                </div>
-                            </div>
-
-                            {/* Sort + Results header */}
-                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-1">
-                                <h1 className="text-lg md:text-xl font-black text-[#071C4B] tracking-tight flex items-center gap-3 flex-wrap">
-                                    Departure flights
-                                    <span className="inline-flex items-center px-3 py-1.5 rounded-full bg-[#071C4B]/08 text-[#071C4B] text-xs font-bold border border-[#071C4B]/10">
-                                        {filteredResults.length} / {results?.length || 0} found
-                                    </span>
-                                </h1>
-                                <div className="flex gap-2 w-full sm:w-auto">
-                                    <button
-                                        onClick={() => setSortBy('price')}
-                                        className={`flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-wider border transition-all ${sortBy === 'price' ? 'bg-[#071C4B] text-white border-[#071C4B] shadow-sm' : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300 hover:bg-gray-50'}`}
-                                    >
-                                        Cheapest
-                                    </button>
-                                    <button
-                                        onClick={() => setSortBy('duration')}
-                                        className={`flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-wider border transition-all ${sortBy === 'duration' ? 'bg-[#071C4B] text-white border-[#071C4B] shadow-sm' : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300 hover:bg-gray-50'}`}
-                                    >
-                                        Fastest
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* Main List Container – only this section scrolls on desktop */}
-                            <div className="relative min-h-[400px] lg:max-h-[calc(100vh-260px)] lg:overflow-y-auto lg:pr-1">
-                                {isRefreshing && (
-                                    <div className="absolute top-0 left-0 right-0 z-50 h-1.5 overflow-hidden rounded-t-[2rem]">
-                                        <div className="h-full bg-gradient-to-r from-red-600 via-blue-900 to-red-600 w-full animate-loading-bar shadow-[0_0_10px_rgba(196,30,34,0.5)]"></div>
-                                    </div>
-                                )}
-                                {isRefreshing && (
-                                    <div className="absolute inset-0 z-30 bg-white/20 backdrop-blur-[2px] rounded-[2rem] flex items-center justify-center animate-in fade-in duration-300">
-                                        <div className="bg-white/90 px-6 py-3 rounded-2xl shadow-2xl border border-gray-100 flex items-center gap-4">
-                                            <div className="w-5 h-5 border-2 border-blue-900/10 border-t-red-600 rounded-full animate-spin"></div>
-                                            <span className="text-[10px] font-black text-[#071C4B] uppercase tracking-widest">Live Pricing...</span>
-                                        </div>
-                                    </div>
-                                )}
-
-                                <div className={`space-y-5 transition-all duration-500 ${isRefreshing ? 'opacity-30 blur-sm pointer-events-none' : 'opacity-100'}`}>
-                                    {filteredResults.length === 0 ? (
-                                        <div className="bg-white border-2 border-dashed border-gray-200 rounded-2xl p-16 flex flex-col items-center text-center">
-                                            <div className="w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center text-3xl mb-5 text-gray-400">✈️</div>
-                                            <h3 className="text-lg font-black text-[#071C4B]">No flights found</h3>
-                                            <p className="text-sm text-gray-500 max-w-xs mt-2">Try resetting filters or changing dates.</p>
-                                            <button
-                                                onClick={() => {
-                                                    setSelectedAirlines([]);
-                                                    setMaxStops(null);
-                                                    setTimeSlots([]);
-                                                    setMaxPrice(null);
-                                                }}
-                                                className="mt-6 px-6 py-2.5 bg-[#071C4B] text-white rounded-xl font-bold text-xs uppercase tracking-wider shadow-lg shadow-[#071C4B]/15"
-                                            >
-                                                Clear filters
-                                            </button>
-                                        </div>
-                                    ) : (
-                                        filteredResults.map((item: FlightOffer, index: number) => {
-                                            const originalPrice = parseFloat(item.price.total);
-                                            const adjustedPrice = originalPrice * (1 + (pricingAdjustment / 100));
-
-                                            const adjustedOffer: FlightOffer & { basePrice?: number; adjustment?: number } = {
-                                                ...item,
-                                                price: {
-                                                    ...item.price,
-                                                    total: adjustedPrice.toString()
-                                                },
-                                                basePrice: originalPrice,
-                                                adjustment: pricingAdjustment
-                                            };
-
-                                            const badgeForFirst = index === 0
-                                                ? (sortBy === 'price' ? 'cheapest' : sortBy === 'duration' ? 'fastest' : 'recommended')
-                                                : undefined;
-
-                                            return (
-                                                <FlightCard
-                                                    key={index}
-                                                    offer={adjustedOffer}
-                                                    dictionaries={dictionaries}
-                                                    onViewDetails={handleBookingClick}
-                                                    badge={badgeForFirst}
-                                                    variant={index % 2 === 1 ? 'alt' : 'default'}
-                                                    displayCurrency={displayCurrency}
-                                                />
-                                            );
-                                        })
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </main>
-        );
+    // 1. Filter by Airlines
+    if (selectedAirlines.length > 0) {
+      fr = fr.filter((item) =>
+        selectedAirlines.includes(item.itineraries[0].segments[0].carrierCode),
+      );
     }
 
+    // 2. Filter by Stops
+    if (maxStops !== null) {
+      fr = fr.filter(
+        (item) => item.itineraries[0].segments.length - 1 <= maxStops,
+      );
+    }
+
+    // 3. Filter by Time Slots
+    if (timeSlots.length > 0) {
+      fr = fr.filter((item) => {
+        const hour = new Date(
+          item.itineraries[0].segments[0].departure.at,
+        ).getHours();
+        if (timeSlots.includes("morning") && hour >= 6 && hour < 12)
+          return true;
+        if (timeSlots.includes("afternoon") && hour >= 12 && hour < 18)
+          return true;
+        if (timeSlots.includes("evening") && hour >= 18 && hour < 24)
+          return true;
+        if (timeSlots.includes("night") && hour >= 0 && hour < 6) return true;
+        return false;
+      });
+    }
+
+    // 4. Filter by Baggage
+    if (baggageOnly) {
+      fr = fr.filter((item) => {
+        const baggage =
+          item.travelerPricings?.[0]?.fareDetailsBySegment?.[0]
+            ?.includedCheckedBags;
+        return baggage && (baggage.quantity > 0 || baggage.weight > 0);
+      });
+    }
+
+    // 5. Filter by Max Price
+    if (maxPrice !== null) {
+      fr = fr.filter((item) => {
+        const adjusted =
+          parseFloat(item.price.total) * (1 + pricingAdjustment / 100);
+        return adjusted <= maxPrice;
+      });
+    }
+
+    // 6. Sort
+    if (sortBy === "price") {
+      fr.sort((a, b) => parseFloat(a.price.total) - parseFloat(b.price.total));
+    } else if (sortBy === "duration") {
+      fr.sort((a, b) => {
+        const getDur = (iso: string) => {
+          const matches = iso.match(/PT(\d+H)?(\d+M)?/);
+          const h = parseInt(matches?.[1]?.replace("H", "") || "0");
+          const m = parseInt(matches?.[2]?.replace("M", "") || "0");
+          return h * 60 + m;
+        };
+        return (
+          getDur(a.itineraries[0].duration) - getDur(b.itineraries[0].duration)
+        );
+      });
+    }
+
+    return fr;
+  }, [
+    results,
+    selectedAirlines,
+    maxStops,
+    timeSlots,
+    baggageOnly,
+    maxPrice,
+    sortBy,
+    pricingAdjustment,
+  ]);
+
+  // Results View
+  if (loading) return <SearchingOverlay />;
+
+  if (results) {
     return (
-        <main className="min-h-screen bg-gray-50 relative font-sans overflow-x-hidden">
-            <Header />
+      <main className="min-h-screen bg-[#F8FAFC] font-sans overflow-x-hidden">
+        <div className="sticky top-0 z-[1000] w-full bg-white shadow-md">
+          <Header />
+          <div className="bg-white border-t border-gray-100">
+            <div className="w-full px-4 sm:px-6 lg:px-8 py-2 md:py-3">
+              <ModifySearchForm
+                initialParams={searchParams}
+                markup={pricingAdjustment}
+                onResults={(data, type, params) => {
+                  handleResults(data, type, params);
+                }}
+                onSearchStart={handleSearchStart}
+                onError={handleError}
+              />
+            </div>
+          </div>
+        </div>
 
-            {/* Hero */}
-            <section className="relative z-50 overflow-visible">
-                <HeroSlider />
-                <div className="absolute bottom-72 md:bottom-80 left-0 right-0 z-[100] translate-y-1/2 flex justify-center px-4">
-                    <div className="w-full max-w-7xl">
-                        <SearchForm
-                            onResults={handleResults}
-                            onSearchStart={handleSearchStart}
-                            onError={handleError}
-                            autoSearchDate={searchParams?.departureDate}
-                        />
-                    </div>
-                </div>
-            </section>
+        <div className="w-full px-4 sm:px-6 lg:px-8 py-5 md:py-8 bg-gradient-to-b from-gray-50/50 to-[#F8FAFC]">
+          {/* Mobile Only: Quick Filter Button */}
+          <div className="lg:hidden flex items-center justify-between gap-4 mb-4">
+            <button
+              onClick={() => setIsMobileFiltersOpen(true)}
+              className="flex-1 bg-white border border-gray-200 rounded-xl py-3.5 px-4 flex items-center justify-center gap-2 text-sm font-bold text-[#071C4B] shadow-[0_2px_12px_rgba(7,28,75,0.06)]"
+            >
+              <FaSearch className="text-[#071C4B]" />
+              Filters & Sort
+            </button>
+          </div>
+          <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
+            {/* Sidebar Filters (Desktop always, Mobile Drawer) */}
+            <aside
+              className={`${isMobileFiltersOpen ? "fixed inset-0 z-[2000] bg-white p-6 overflow-y-auto block" : "hidden"} lg:block w-full lg:w-72 shrink-0 space-y-6`}
+            >
+              <div className="lg:hidden flex justify-between items-center mb-6">
+                <h2 className="text-xl font-black text-[#071C4B]">Filters</h2>
+                <button
+                  onClick={() => setIsMobileFiltersOpen(false)}
+                  className="p-2 text-gray-400 hover:text-gray-600"
+                >
+                  <FaTimes size={20} />
+                </button>
+              </div>
 
-            {/* Info Section - Reduce top margin as form moves UP */}
-            <section className="bg-[#f7f7f7] py-12 md:py-20 mt-[400px] sm:mt-[350px] lg:mt-24 transition-all duration-700">
-                <div className="max-w-6xl mx-auto px-4 md:px-6 lg:px-0 space-y-10 md:space-y-16">
-                    <h2 className="text-3xl md:text-5xl font-handwriting text-[#111827] text-center mb-4 md:mb-8 leading-tight">
-                        Fly Safe with HiFi Travels Hassle-free
+              <div className="bg-white rounded-2xl shadow-[0_2px_16px_rgba(7,28,75,0.06)] border border-gray-100 overflow-hidden sticky top-24">
+                <div className="p-5 border-b border-gray-100 space-y-3 bg-gray-50/40">
+                  <div className="flex justify-between items-center">
+                    <h2 className="text-xs font-black text-[#071C4B] uppercase tracking-widest">
+                      Refine search
                     </h2>
-                    {/* Row 1: Image LEFT, Text RIGHT */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 items-start">
-                        <div className="bg-white shadow-[0_10px_30px_rgba(0,0,0,0.12)] p-2 md:p-3 overflow-hidden group">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src="https://images.pexels.com/photos/1008155/pexels-photo-1008155.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Friendly travel assistance" className="w-full h-56 md:h-72 object-cover group-hover:scale-105 transition-transform duration-700" />
-                        </div>
-                        <div className="text-left text-gray-700 text-sm md:text-base leading-relaxed">
-                            <p className="mb-3">
-                                Booking a trip should be exciting, and not overwhelming. Whether you are
-                                planning a holiday, work trip, or quick getaway, we know you want a hassle-free
-                                experience. Welcome to HiFi Travels, your only flight booking destination that
-                                makes the process simple and stress-free.
-                            </p>
-                            <p className="mb-3">
-                                Our experienced travel booking experts help you secure the right flights at the
-                                best prices without the usual confusion or hidden costs.
-                            </p>
-                            <p className="mb-3">
-                                Need a quote? Just reach out to us without any pressure and obligation. We’ll
-                                understand your requirements and guide you through the best options as per your
-                                demand. You focus on the destination and leave the rest to us.
-                            </p>
-                            <p>
-                                Want us to ask you a few questions before you proceed? Our agents are just one
-                                step away.
-                            </p>
-                        </div>
-                    </div>
-
-                    {/* Row 2: Text LEFT, Image RIGHT */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 items-start">
-                        <div className="text-left text-gray-700 text-sm md:text-base leading-relaxed order-2 md:order-1">
-                            <h3 className="text-2xl font-bold text-[#071C4B] mb-4 uppercase tracking-tighter">Your Trusted Travel Companion</h3>
-                            <p className="mb-3">
-                                From 24/7 dedicated support to flexible booking options, we prioritize your convenience at every step. Whether you&apos;re traveling for leisure or business, our team ensures a seamless journey across all international and domestic routes.
-                            </p>
-                        </div>
-                        <div className="bg-white shadow-[0_10px_30px_rgba(0,0,0,0.12)] p-2 md:p-3 overflow-hidden group order-1 md:order-2">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src="https://images.pexels.com/photos/347141/pexels-photo-347141.jpeg?auto=compress&cs=tinysrgb&w=800" alt="Team support" className="w-full h-56 md:h-72 object-cover group-hover:scale-105 transition-transform duration-700" />
-                        </div>
-                    </div>
+                    <button
+                      onClick={() => {
+                        setSelectedAirlines([]);
+                        setMaxStops(null);
+                        setTimeSlots([]);
+                        setRefundableOnly(false);
+                        setBaggageOnly(false);
+                        setMaxPrice(null);
+                      }}
+                      className="text-[10px] font-bold text-[#071C4B] hover:underline uppercase"
+                    >
+                      Reset
+                    </button>
+                  </div>
+                  <div className="flex flex-col gap-1 pt-2 border-t border-gray-100">
+                    <span className="text-[10px] font-bold text-gray-500">
+                      Markup: {pricingAdjustment}%
+                    </span>
+                    <span className="text-[10px] font-bold text-emerald-600 flex items-center gap-1.5">
+                      <span className="animate-pulse w-2 h-2 bg-emerald-500 rounded-full" />
+                      Live pricing
+                    </span>
+                  </div>
                 </div>
-            </section>
 
-            {/* Have Questions Section (CTA) */}
-            <section
-                className="py-10 md:py-14 bg-gradient-to-r from-[#0044a7] via-[#5b3cae] to-[#e03737] relative overflow-hidden"
-                style={{
-                    backgroundImage: `
+                <div className="p-6 space-y-8 max-h-[calc(100vh-200px)] lg:max-h-[calc(100vh-200px)] overflow-y-auto no-scrollbar">
+                  {/* Stops */}
+                  <div className="space-y-4">
+                    <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                      Total Stops
+                    </h4>
+                    <div className="space-y-2">
+                      {[
+                        { label: "Direct Only", value: 0 },
+                        { label: "1 Stop or less", value: 1 },
+                        { label: "Any Stops", value: null },
+                      ].map((stop) => (
+                        <label
+                          key={stop.label}
+                          className="flex items-center gap-3 cursor-pointer group p-2 rounded-xl hover:bg-blue-50/50 transition-all border border-transparent hover:border-blue-100/50"
+                        >
+                          <input
+                            type="radio"
+                            name="stops-side"
+                            checked={maxStops === stop.value}
+                            onChange={() => setMaxStops(stop.value)}
+                            className="w-4 h-4 accent-[#071C4B]"
+                          />
+                          <span
+                            className={`text-[11px] font-bold ${maxStops === stop.value ? "text-[#071C4B]" : "text-gray-500"}`}
+                          >
+                            {stop.label}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Price Range */}
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                        Max Budget
+                      </h4>
+                      <span className="text-[10px] font-black text-[#071C4B] bg-blue-50 px-2 py-0.5 rounded">
+                        {formatCurrency(maxPrice || 0, "AUD", displayCurrency)}
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max={maxPrice ? Math.max(maxPrice, 10000) : 10000}
+                      step="100"
+                      value={maxPrice || 10000}
+                      onChange={(e) => setMaxPrice(parseInt(e.target.value))}
+                      className="w-full h-1.5 bg-gray-100 rounded-full appearance-none cursor-pointer accent-[#071C4B]"
+                    />
+                  </div>
+
+                  {/* Time Slots */}
+                  <div className="space-y-4">
+                    <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                      Departure Time
+                    </h4>
+                    <div className="grid grid-cols-2 gap-2">
+                      {[
+                        { id: "morning", label: "Morning", icon: "🌅" },
+                        { id: "afternoon", label: "Afternoon", icon: "☀️" },
+                        { id: "evening", label: "Evening", icon: "🌆" },
+                        { id: "night", label: "Night", icon: "🌙" },
+                      ].map((slot) => (
+                        <button
+                          key={slot.id}
+                          onClick={() =>
+                            setTimeSlots((prev) =>
+                              prev.includes(slot.id)
+                                ? prev.filter((s) => s !== slot.id)
+                                : [...prev, slot.id],
+                            )
+                          }
+                          className={`py-3 rounded-2xl border flex flex-col items-center gap-1 transition-all ${
+                            timeSlots.includes(slot.id)
+                              ? "bg-[#071C4B] text-white border-[#071C4B] shadow-md shadow-blue-900/20"
+                              : "bg-white text-gray-400 border-gray-100 hover:border-gray-300"
+                          }`}
+                        >
+                          <span className="text-sm">{slot.icon}</span>
+                          <span className="text-[8px] font-black uppercase tracking-tighter">
+                            {slot.label}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Airlines */}
+                  {dictionaries?.carriers && (
+                    <div className="space-y-4 pt-4 border-t border-gray-50">
+                      <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                        Preferred Airlines
+                      </h4>
+                      <div className="space-y-2 max-h-48 overflow-y-auto pr-2 no-scrollbar">
+                        {Object.entries(dictionaries.carriers).map(
+                          ([code, name]: any) => (
+                            <label
+                              key={code}
+                              className="flex items-center gap-3 cursor-pointer group p-1.5 rounded-lg hover:bg-gray-50 transition-all"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={selectedAirlines.includes(code)}
+                                onChange={() =>
+                                  setSelectedAirlines((prev) =>
+                                    prev.includes(code)
+                                      ? prev.filter((c) => c !== code)
+                                      : [...prev, code],
+                                  )
+                                }
+                                className="w-3.5 h-3.5 accent-[#071C4B]"
+                              />
+                              <span className="text-[11px] font-bold text-gray-500 group-hover:text-gray-700 truncate">
+                                {name}
+                              </span>
+                            </label>
+                          ),
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Mobile: Apply Button */}
+                  <div className="lg:hidden pt-6">
+                    <button
+                      onClick={() => setIsMobileFiltersOpen(false)}
+                      className="w-full bg-[#071C4B] text-white py-4 rounded-xl font-black text-xs uppercase tracking-widest"
+                    >
+                      Apply Filters
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </aside>
+
+            {/* RIGHT: Results & Sorting */}
+            <div className="flex-1 space-y-6">
+              {/* Date Selector */}
+              <div className="bg-white rounded-2xl md:rounded-[1.25rem] shadow-[0_2px_16px_rgba(7,28,75,0.06)] border border-gray-100 p-2.5 overflow-x-auto no-scrollbar">
+                <div className="flex gap-2 min-w-max md:min-w-0 md:flex-1">
+                  {(() => {
+                    // Do not show back dates – only today and future
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    const selectedDate = searchParams?.departureDate
+                      ? new Date(searchParams.departureDate)
+                      : today;
+                    const startDate =
+                      selectedDate < today ? today : selectedDate;
+
+                    return Array.from({ length: 7 }).map((_, i) => {
+                      const date = new Date(startDate);
+                      date.setDate(startDate.getDate() + i);
+                      const ds = date.toISOString().split("T")[0];
+                      const isSelected = ds === searchParams?.departureDate;
+
+                      const baseP =
+                        results?.length > 0
+                          ? Math.min(
+                              ...results.map((r: any) =>
+                                parseFloat(r.price.total),
+                              ),
+                            )
+                          : 800;
+                      const estP = Math.round(
+                        baseP *
+                          (1 + pricingAdjustment / 100) *
+                          (1 + (Math.random() * 0.1 - 0.05)),
+                      );
+
+                      return (
+                        <button
+                          key={i}
+                          onClick={() => handleDateChange(ds)}
+                          className={`w-20 md:flex-1 py-3.5 md:py-4 flex flex-col items-center justify-center rounded-xl md:rounded-2xl transition-all duration-200 ${isSelected ? "bg-[#071C4B] text-white shadow-lg shadow-[#071C4B]/25 ring-2 ring-[#071C4B]/20 scale-[1.02] z-10" : "hover:bg-gray-50 text-gray-600 border border-transparent hover:border-gray-100"}`}
+                        >
+                          <span
+                            className={`text-[8px] md:text-[9px] font-bold uppercase tracking-tight mb-0.5 ${isSelected ? "text-white/70" : "text-gray-400"}`}
+                          >
+                            {date.toLocaleDateString("en-US", {
+                              weekday: "short",
+                            })}
+                          </span>
+                          <span className="text-base md:text-lg font-black leading-none mb-1 tabular-nums">
+                            {date.getDate()}
+                          </span>
+                          <span
+                            className={`text-[8px] font-bold ${isSelected ? "text-white/90" : "text-emerald-600"}`}
+                          >
+                            {formatCurrency(estP, "AUD", displayCurrency)}
+                          </span>
+                        </button>
+                      );
+                    });
+                  })()}
+                </div>
+              </div>
+
+              {/* Sort + Results header */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-1">
+                <h1 className="text-lg md:text-xl font-black text-[#071C4B] tracking-tight flex items-center gap-3 flex-wrap">
+                  Departure flights
+                  <span className="inline-flex items-center px-3 py-1.5 rounded-full bg-[#071C4B]/08 text-[#071C4B] text-xs font-bold border border-[#071C4B]/10">
+                    {filteredResults.length} / {results?.length || 0} found
+                  </span>
+                </h1>
+                <div className="flex gap-2 w-full sm:w-auto">
+                  <button
+                    onClick={() => setSortBy("price")}
+                    className={`flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-wider border transition-all ${sortBy === "price" ? "bg-[#071C4B] text-white border-[#071C4B] shadow-sm" : "bg-white text-gray-500 border-gray-200 hover:border-gray-300 hover:bg-gray-50"}`}
+                  >
+                    Cheapest
+                  </button>
+                  <button
+                    onClick={() => setSortBy("duration")}
+                    className={`flex-1 sm:flex-none px-4 py-2.5 rounded-xl text-[10px] font-bold uppercase tracking-wider border transition-all ${sortBy === "duration" ? "bg-[#071C4B] text-white border-[#071C4B] shadow-sm" : "bg-white text-gray-500 border-gray-200 hover:border-gray-300 hover:bg-gray-50"}`}
+                  >
+                    Fastest
+                  </button>
+                </div>
+              </div>
+
+              {/* Main List Container – only this section scrolls on desktop */}
+              <div className="relative min-h-[400px] lg:max-h-[calc(100vh-260px)] lg:overflow-y-auto lg:pr-1">
+                {isRefreshing && (
+                  <div className="absolute top-0 left-0 right-0 z-50 h-1.5 overflow-hidden rounded-t-[2rem]">
+                    <div className="h-full bg-gradient-to-r from-red-600 via-blue-900 to-red-600 w-full animate-loading-bar shadow-[0_0_10px_rgba(196,30,34,0.5)]"></div>
+                  </div>
+                )}
+                {isRefreshing && (
+                  <div className="absolute inset-0 z-30 bg-white/20 backdrop-blur-[2px] rounded-[2rem] flex items-center justify-center animate-in fade-in duration-300">
+                    <div className="bg-white/90 px-6 py-3 rounded-2xl shadow-2xl border border-gray-100 flex items-center gap-4">
+                      <div className="w-5 h-5 border-2 border-blue-900/10 border-t-red-600 rounded-full animate-spin"></div>
+                      <span className="text-[10px] font-black text-[#071C4B] uppercase tracking-widest">
+                        Live Pricing...
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                <div
+                  className={`space-y-5 transition-all duration-500 ${isRefreshing ? "opacity-30 blur-sm pointer-events-none" : "opacity-100"}`}
+                >
+                  {filteredResults.length === 0 ? (
+                    <div className="bg-white border-2 border-dashed border-gray-200 rounded-2xl p-16 flex flex-col items-center text-center">
+                      <div className="w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center text-3xl mb-5 text-gray-400">
+                        ✈️
+                      </div>
+                      <h3 className="text-lg font-black text-[#071C4B]">
+                        No flights found
+                      </h3>
+                      <p className="text-sm text-gray-500 max-w-xs mt-2">
+                        Try resetting filters or changing dates.
+                      </p>
+                      <button
+                        onClick={() => {
+                          setSelectedAirlines([]);
+                          setMaxStops(null);
+                          setTimeSlots([]);
+                          setMaxPrice(null);
+                        }}
+                        className="mt-6 px-6 py-2.5 bg-[#071C4B] text-white rounded-xl font-bold text-xs uppercase tracking-wider shadow-lg shadow-[#071C4B]/15"
+                      >
+                        Clear filters
+                      </button>
+                    </div>
+                  ) : (
+                    filteredResults.map((item: FlightOffer, index: number) => {
+                      const originalPrice = parseFloat(item.price.total);
+                      const adjustedPrice =
+                        originalPrice * (1 + pricingAdjustment / 100);
+
+                      const adjustedOffer: FlightOffer & {
+                        basePrice?: number;
+                        adjustment?: number;
+                      } = {
+                        ...item,
+                        price: {
+                          ...item.price,
+                          total: adjustedPrice.toString(),
+                        },
+                        basePrice: originalPrice,
+                        adjustment: pricingAdjustment,
+                      };
+
+                      const badgeForFirst =
+                        index === 0
+                          ? sortBy === "price"
+                            ? "cheapest"
+                            : sortBy === "duration"
+                              ? "fastest"
+                              : "recommended"
+                          : undefined;
+
+                      return (
+                        <FlightCard
+                          key={index}
+                          offer={adjustedOffer}
+                          dictionaries={dictionaries}
+                          onViewDetails={handleBookingClick}
+                          badge={badgeForFirst}
+                          variant={index % 2 === 1 ? "alt" : "default"}
+                          displayCurrency={displayCurrency}
+                        />
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  return (
+    <main className="min-h-screen bg-gray-50 relative font-sans overflow-x-hidden">
+      <Header />
+
+      {/* Hero */}
+      <section className="relative overflow-x-hidden">
+        <HeroSlider />
+        {/* Search form overlaps next section slightly via negative margin */}
+        <div className="relative z-[100] -mt-6 sm:-mt-10 md:-mt-14 flex justify-center px-3 sm:px-4">
+          <div className="w-full max-w-7xl">
+            <SearchForm
+              onResults={handleResults}
+              onSearchStart={handleSearchStart}
+              onError={handleError}
+              autoSearchDate={searchParams?.departureDate}
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Info Section */}
+      <section className="bg-[#f7f7f7] py-8 md:py-20 mt-4 sm:mt-6 md:mt-10">
+        <div className="max-w-6xl mx-auto px-4 md:px-6 lg:px-0 space-y-10 md:space-y-16">
+          <h2 className="text-2xl sm:text-3xl md:text-5xl font-handwriting text-[#111827] text-center mb-4 md:mb-8 leading-tight">
+            Fly Safe with HiFi Travels Hassle-free
+          </h2>
+          {/* Row 1: Image LEFT, Text RIGHT */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 items-start">
+            <div className="bg-white shadow-[0_10px_30px_rgba(0,0,0,0.12)] p-2 md:p-3 overflow-hidden group">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="https://images.pexels.com/photos/1008155/pexels-photo-1008155.jpeg?auto=compress&cs=tinysrgb&w=800"
+                alt="Friendly travel assistance"
+                className="w-full h-48 sm:h-56 md:h-72 object-cover group-hover:scale-105 transition-transform duration-700"
+              />
+            </div>
+            <div className="text-left text-gray-700 text-sm md:text-base leading-relaxed">
+              <p className="mb-3">
+                Booking a trip should be exciting, and not overwhelming. Whether
+                you are planning a holiday, work trip, or quick getaway, we know
+                you want a hassle-free experience. Welcome to HiFi Travels, your
+                only flight booking destination that makes the process simple
+                and stress-free.
+              </p>
+              <p className="mb-3">
+                Our experienced travel booking experts help you secure the right
+                flights at the best prices without the usual confusion or hidden
+                costs.
+              </p>
+              <p className="mb-3">
+                Need a quote? Just reach out to us without any pressure and
+                obligation. We'll understand your requirements and guide you
+                through the best options as per your demand. You focus on the
+                destination and leave the rest to us.
+              </p>
+              <p>
+                Want us to ask you a few questions before you proceed? Our
+                agents are just one step away.
+              </p>
+            </div>
+          </div>
+
+          {/* Row 2: Text LEFT, Image RIGHT */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 items-start">
+            <div className="text-left text-gray-700 text-sm md:text-base leading-relaxed order-2 md:order-1">
+              <h3 className="text-xl sm:text-2xl font-bold text-[#071C4B] mb-4 uppercase tracking-tighter">
+                Your Trusted Travel Companion
+              </h3>
+              <p className="mb-3">
+                From 24/7 dedicated support to flexible booking options, we
+                prioritize your convenience at every step. Whether you&apos;re
+                traveling for leisure or business, our team ensures a seamless
+                journey across all international and domestic routes.
+              </p>
+            </div>
+            <div className="bg-white shadow-[0_10px_30px_rgba(0,0,0,0.12)] p-2 md:p-3 overflow-hidden group order-1 md:order-2">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="https://images.pexels.com/photos/347141/pexels-photo-347141.jpeg?auto=compress&cs=tinysrgb&w=800"
+                alt="Team support"
+                className="w-full h-48 sm:h-56 md:h-72 object-cover group-hover:scale-105 transition-transform duration-700"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Have Questions Section (CTA) */}
+      <section
+        className="py-10 md:py-14 bg-gradient-to-r from-[#0044a7] via-[#5b3cae] to-[#e03737] relative overflow-hidden"
+        style={{
+          backgroundImage: `
                         radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 3px),
                         radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 2px),
                         linear-gradient(to right, #0044a7, #5b3cae, #e03737)
                     `,
-                    backgroundSize: '550px 550px, 350px 350px, cover',
-                    backgroundPosition: '0 0, 40px 60px, center'
-                }}
-            >
-                <div className="max-w-5xl mx-auto px-4 md:px-0 flex flex-col md:flex-row items-center justify-between gap-6 text-white relative z-10">
-                    <div className="text-left">
-                        <h3 className="text-2xl md:text-3xl font-serif font-bold mb-2 tracking-wide">
-                            Have Questions?
-                        </h3>
-                        <p className="text-sm md:text-base text-white/90 max-w-xl font-light leading-relaxed">
-                            Drop us a message anytime and our team will help you figure out the best route,
-                            fare, or destination that suits your budget and plans.
-                        </p>
-                    </div>
-                    <a
-                        href="#contact"
-                        className="inline-flex items-center justify-center px-8 md:px-10 py-3 md:py-3.5 rounded bg-[#0056b3] hover:bg-[#004494] text-white text-sm md:text-base font-bold shadow-lg transition-all hover:scale-105 whitespace-nowrap"
-                    >
-                        Get In Touch Now!
-                    </a>
-                </div>
-            </section>
+          backgroundSize: "550px 550px, 350px 350px, cover",
+          backgroundPosition: "0 0, 40px 60px, center",
+        }}
+      >
+        <div className="max-w-5xl mx-auto px-4 md:px-6 lg:px-0 flex flex-col md:flex-row items-center justify-between gap-6 text-white relative z-10">
+          <div className="text-center md:text-left">
+            <h3 className="text-xl sm:text-2xl md:text-3xl font-serif font-bold mb-2 tracking-wide">
+              Have Questions?
+            </h3>
+            <p className="text-sm md:text-base text-white/90 max-w-xl font-light leading-relaxed">
+              Drop us a message anytime and our team will help you figure out
+              the best route, fare, or destination that suits your budget and
+              plans.
+            </p>
+          </div>
+          <a
+            href="#contact"
+            className="w-full md:w-auto inline-flex items-center justify-center px-8 md:px-10 py-3 md:py-3.5 rounded bg-[#0056b3] hover:bg-[#004494] text-white text-sm md:text-base font-bold shadow-lg transition-all hover:scale-105 whitespace-nowrap"
+          >
+            Get In Touch Now!
+          </a>
+        </div>
+      </section>
 
-            {/* Contact form – submits as Lead in Admin CRM (source: website) */}
-            <ContactSection />
+      {/* Contact form – submits as Lead in Admin CRM (source: website) */}
+      <ContactSection />
 
-            {/* Top Recommended Destinations */}
-            <section className="bg-white py-16 md:py-20">
-                <div className="max-w-6xl mx-auto px-4 md:px-0">
-                    <h2 className="text-2xl md:text-3xl font-bold text-center mb-10 text-[#071C4B] uppercase tracking-tighter">
-                        Top Recommended Destinations
-                    </h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
-                        {topDestinations.map((item, idx) => (
-                            <div
-                                key={idx}
-                                className="relative group overflow-hidden rounded-sm shadow-[0_8px_24px_rgba(0,0,0,0.2)] cursor-pointer"
-                            >
-                                <img
-                                    src={item.image}
-                                    alt={item.city}
-
-                                    className="w-full h-72 md:h-80 object-cover transform group-hover:scale-110 transition-transform duration-500"
-                                />
-                                <div className="absolute inset-0 bg-black/35 group-hover:bg-black/45 transition-colors duration-300 flex flex-col items-center justify-center text-white text-center px-3">
-                                    <span className="text-sm md:text-base font-semibold mb-1">
-                                        {item.city}
-                                    </span>
-                                    <span className="text-xs md:text-sm opacity-90">
-                                        {item.price}
-                                    </span>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* Testimonials - What Our Customers Say */}
-            <section className="bg-white py-16 md:py-20">
-                <div className="max-w-6xl mx-auto px-4 md:px-0">
-                    <h2 className="text-2xl md:text-3xl font-semibold text-center mb-10">
-                        What Our Customers Say
-                    </h2>
-
-                    <div className="flex flex-col md:flex-row gap-10 items-center">
-                        {/* Left rating block */}
-                        <div className="w-full md:w-1/4 text-center md:text-left space-y-2 md:pl-6">
-                            <div className="text-sm uppercase tracking-wide text-gray-700">
-                                EXCELLENT
-                            </div>
-                            <div className="flex justify-center md:justify-start gap-1 text-[#fbbf24] text-xl">
-                                {Array.from({ length: 5 }).map((_, i) => (
-                                    <FaStar key={i} />
-                                ))}
-                            </div>
-                            <div className="text-xs text-gray-600">
-                                Based on 409 reviews
-                            </div>
-                            <div className="mt-2 flex justify-center md:justify-start items-center gap-2 text-[#4285F4]">
-                                <FaGoogle className="text-2xl" />
-                                <span className="text-lg font-semibold">Google</span>
-                            </div>
-                        </div>
-
-                        {/* Right testimonials slider mock */}
-                        <div className="w-full md:w-3/4 relative">
-                            <button className="hidden lg:flex absolute -left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white shadow-md items-center justify-center text-gray-500 hover:bg-gray-50 z-10 transition-all hover:scale-110">
-                                <FaChevronLeft size={14} />
-                            </button>
-                            <button className="hidden lg:flex absolute -right-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white shadow-md items-center justify-center text-gray-500 hover:bg-gray-50 z-10 transition-all hover:scale-110">
-                                <FaChevronRight size={14} />
-                            </button>
-
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {[
-                                    {
-                                        name: "Atif",
-                                        time: "2 weeks ago",
-                                        text: "Paid $200 deposit on 19 November for a flight booking. No booking was provided. Refund was refused and voucher offered instead...",
-                                    },
-                                    {
-                                        name: "Manpreet Sandhu",
-                                        time: "2 weeks ago",
-                                        text: "I had a great experience with HiFi Travel. I would especially like to mention Sandy—she helped me get the right-priced ticket and was very...",
-                                    },
-                                    {
-                                        name: "Lovepreet",
-                                        time: "2 weeks ago",
-                                        text: "I would like to share my excellent experience with Nisha. She provided outstanding support with my ticket booking and guided me at every step...",
-                                    },
-                                ].map((t, idx) => (
-                                    <div key={idx} className="bg-white rounded-xl shadow-[0_8px_24px_rgba(0,0,0,0.08)] p-5 space-y-3">
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-8 h-8 rounded-full bg-purple-500 text-white flex items-center justify-center text-sm font-semibold">
-                                                    {t.name.charAt(0)}
-                                                </div>
-                                                <div className="text-left">
-                                                    <div className="text-sm font-semibold text-gray-900">{t.name}</div>
-                                                    <div className="text-[11px] text-gray-500">{t.time}</div>
-                                                </div>
-                                            </div>
-                                            <FaGoogle className="text-[#4285F4]" />
-                                        </div>
-
-                                        <div className="flex gap-1 text-[#fbbf24] text-xs">
-                                            {Array.from({ length: 5 }).map((_, i) => (
-                                                <FaStar key={i} />
-                                            ))}
-                                        </div>
-
-                                        <p className="text-xs text-gray-600 leading-relaxed">
-                                            {t.text}
-                                        </p>
-                                        <button className="text-[11px] font-semibold text-[#0b4ba8] hover:underline">
-                                            Read more
-                                        </button>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            {/* Our Airlines Partners */}
-            <section className="bg-white py-16 md:py-20">
-                <div className="max-w-6xl mx-auto px-4 md:px-0 text-center">
-                    <h2 className="text-2xl md:text-3xl font-semibold mb-10">
-                        Our Airlines Partners
-                    </h2>
-
-                    {/* Airline logos row */}
-                    <div className="flex items-center justify-center gap-8 md:gap-12 mb-10">
-                        <button className="hidden md:flex w-8 h-8 rounded-full border border-gray-200 items-center justify-center text-gray-500 hover:bg-gray-50">
-                            <FaChevronLeft size={14} />
-                        </button>
-
-                        <div className="flex items-center gap-8 md:gap-12 flex-wrap justify-center">
-                            <span className="text-lg font-semibold text-gray-700">QANTAS</span>
-                            <span className="text-lg font-semibold text-purple-700">THAI</span>
-                            <span className="text-lg font-semibold text-gray-700">Air Canada</span>
-                            <span className="text-lg font-semibold text-red-700">Air China</span>
-                            <span className="text-lg font-semibold text-red-600">Hong Kong Airlines</span>
-                            <span className="text-lg font-semibold text-green-700">Cathay Pacific</span>
-                        </div>
-
-                        <button className="hidden md:flex w-8 h-8 rounded-full border border-gray-200 items-center justify-center text-gray-500 hover:bg-gray-50">
-                            <FaChevronRight size={14} />
-                        </button>
-                    </div>
-
-                    {/* Feature row */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mt-6 text-left md:text-center text-gray-700 text-sm md:text-base">
-                        <div className="flex flex-col items-start md:items-center gap-3">
-                            <div className="text-[#0b4ba8] text-3xl">
-                                <FaDollarSign />
-                            </div>
-                            <h3 className="font-semibold text-[#111827]">
-                                Guaranteed Affordable Pricing
-                            </h3>
-                            <p className="text-sm text-gray-600 leading-relaxed">
-                                We believe everyone deserves to travel without breaking the bank. Our flexible fare options
-                                fit your budget, whether you&apos;re planning months in advance or booking last minute.
-                            </p>
-                        </div>
-
-                        <div className="flex flex-col items-start md:items-center gap-3">
-                            <div className="text-[#0b4ba8] text-3xl">
-                                <FaThumbsUp />
-                            </div>
-                            <h3 className="font-semibold text-[#111827]">
-                                Safe &amp; Secure Booking
-                            </h3>
-                            <p className="text-sm text-gray-600 leading-relaxed">
-                                Your safety and privacy matter. We never share your information with third parties, and your
-                                travel details are handled with the utmost confidentiality.
-                            </p>
-                        </div>
-
-                        <div className="flex flex-col items-start md:items-center gap-3">
-                            <div className="text-[#0b4ba8] text-3xl">
-                                <FaMedal />
-                            </div>
-                            <h3 className="font-semibold text-[#111827]">
-                                Reliable Support (9 AM to 10 PM AEST)
-                            </h3>
-                            <p className="text-sm text-gray-600 leading-relaxed">
-                                Travel questions can come up anytime. Our dedicated experts are available daily between
-                                9 AM and 10 PM AEST to assist you.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <section className="bg-[#f7f7f7] py-16 md:py-24">
-                <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-0">
-                    <h2 className="text-2xl md:text-3xl font-bold text-center mb-10 text-[#071C4B] uppercase tracking-tighter">
-                        Popular Destinations
-                    </h2>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-5 md:gap-6">
-                        {[
-                            { name: "Adelaide", img: "/1.jpg" },
-                            { name: "Brisbane", img: "/2.jpg" },
-                            { name: "Cairns", img: "/3.jpg" },
-                            { name: "Canberra", img: "/4.jpg" },
-                            { name: "Darwin", img: "/5.jpg" },
-                            { name: "Gold Coast", img: "/OIP.webp" },
-                            { name: "Hobart", img: "/OIP (1).webp" },
-                            { name: "Melbourne", img: "/OIP (2).webp" },
-                            { name: "Perth", img: "/OIP (3).webp" },
-                            { name: "Sydney", img: "/OIP (4).webp" },
-                            { name: "India", img: "/OIP (5).webp" },
-                            { name: "Pakistan", img: "/OIP (6).webp" },
-                            { name: "Sri Lanka", img: "/8.jpg" },
-                            { name: "Nepal", img: "/10.jpg" },
-                            { name: "Bangladesh", img: "https://images.unsplash.com/photo-1583212292454-1fe6229603b7?q=80&w=400&auto=format&fit=crop" },
-                        ].map((city, idx) => (
-                            <div key={city.name + idx} className="bg-white rounded-md shadow-[0_6px_18px_rgba(0,0,0,0.12)] overflow-hidden group">
-                                <div className="h-28 md:h-32 bg-gray-200 overflow-hidden">
-                                    <img
-                                        src={city.img}
-                                        alt={city.name}
-                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                                    />
-                                </div>
-                                <div className="bg-[#0b72e7] text-white text-center py-2 text-xs md:text-sm font-semibold">
-                                    {city.name}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* Footer - Flight routes grid (dark blue) */}
-            <section className="bg-[#00308F] text-white py-12 md:py-16">
-                <div className="max-w-6xl mx-auto px-4 md:px-0 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 text-xs md:text-sm leading-relaxed">
-                    {[
-                        {
-                            title: "Australia Flight Tickets",
-                            items: [
-                                "Flights from Sydney",
-                                "Flights from Melbourne",
-                                "Flights from Brisbane",
-                                "Flights from Perth",
-                                "Flights from Adelaide",
-                            ],
-                        },
-                        {
-                            title: "India Flight Tickets",
-                            items: [
-                                "Flights to Delhi",
-                                "Flights to Mumbai",
-                                "Flights to Amritsar",
-                                "Flights to Hyderabad",
-                                "Flights to Ahmedabad",
-                            ],
-                        },
-                        {
-                            title: "Sri Lanka Flight Tickets",
-                            items: [
-                                "Flights to Colombo",
-                                "Flights to Jaffna",
-                                "Flights from Sydney",
-                                "Flights from Melbourne",
-                                "Flights from Perth",
-                            ],
-                        },
-                        {
-                            title: "Nepal Flight Tickets",
-                            items: [
-                                "Flights to Kathmandu",
-                                "Flights from Sydney",
-                                "Flights from Melbourne",
-                                "Flights from Brisbane",
-                                "Flights from Adelaide",
-                            ],
-                        },
-                        {
-                            title: "Bangladesh Flight Tickets",
-                            items: [
-                                "Flights to Dhaka",
-                                "Flights from Sydney",
-                                "Flights from Melbourne",
-                                "Flights from Perth",
-                                "Flights from Brisbane",
-                            ],
-                        },
-                    ].map((col) => (
-                        <div key={col.title}>
-                            <h4 className="font-semibold mb-2">{col.title}</h4>
-                            <ul className="space-y-1 text-white/80">
-                                {col.items.map((item) => (
-                                    <li key={item}>{item}</li>
-                                ))}
-                            </ul>
-                        </div>
-                    ))}
-                </div>
-            </section>
-
-            {/* Main Footer Info (lighter blue) */}
-            <footer className="bg-[#0b4ba8] text-white py-12 md:py-14">
-                <div className="max-w-6xl mx-auto px-4 md:px-0 grid grid-cols-1 md:grid-cols-[2fr,1fr,1.3fr] gap-10 text-sm">
-                    {/* Logo & description */}
-                    <div>
-                        <div className="text-2xl font-bold mb-3">
-                            HiFi <span className="font-normal">Travels</span>
-                        </div>
-                        <p className="text-white/80 leading-relaxed text-xs md:text-sm">
-                            For years, HiFi Travels has been renowned for offering exceptional flight deals,
-                            flexible fare options and transparent pricing. With expert travel consultants and
-                            personalised service, we&apos;ve earned the trust of thousands of travellers.
-                        </p>
-                    </div>
-
-                    {/* Quick Links */}
-                    <div>
-                        <h4 className="font-semibold mb-3 text-sm md:text-base">Quick Links</h4>
-                        <ul className="space-y-1 text-white/80 text-xs md:text-sm">
-                            <li>Home</li>
-                            <li>Deals &amp; Promotions</li>
-                            <li>Travel Insurance</li>
-                            <li>Contact Us</li>
-                        </ul>
-                    </div>
-
-                    {/* Get in Touch */}
-                    <div>
-                        <h4 className="font-semibold mb-3 text-sm md:text-base">Get In Touch</h4>
-                        <p className="text-white/80 text-xs md:text-sm mb-2">
-                            LEVEL 10, 3 PARRAMATTA SQ<br />
-                            PARRAMATTA, NSW 2150
-                        </p>
-                        <p className="text-white/80  text-xs md:text-sm mb-1">
-                            TEL: +61 2 9067 0888
-                        </p>
-                        <p className="text-white/80 text-xs md:text-sm">
-                            Email: info@hifitravels.com.au
-                        </p>
-                    </div>
-                </div>
-
-                <div className="mt-8 border-t border-white/20 pt-4 text-center text-[11px] text-white/80">
-                    FAQ&apos;s | Privacy Policy | Terms &amp; Conditions
-                </div>
-            </footer>
-
-            {selectedFlight && (
-                <DetailsModal
-                    flight={selectedFlight.offer}
-                    initialTab={selectedFlight.tab}
-                    onClose={() => setSelectedFlight(null)}
+      {/* Top Recommended Destinations */}
+      <section className="bg-white py-12 md:py-20">
+        <div className="max-w-6xl mx-auto px-4 md:px-6 lg:px-0">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center mb-6 md:mb-10 text-[#071C4B] uppercase tracking-tighter">
+            Top Recommended Destinations
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5 md:gap-8">
+            {topDestinations.map((item, idx) => (
+              <div
+                key={idx}
+                className="relative group overflow-hidden rounded-sm shadow-[0_8px_24px_rgba(0,0,0,0.2)] cursor-pointer"
+              >
+                <img
+                  src={item.image}
+                  alt={item.city}
+                  className="w-full h-44 sm:h-56 md:h-72 lg:h-80 object-cover transform group-hover:scale-110 transition-transform duration-500"
                 />
-            )}
+                <div className="absolute inset-0 bg-black/35 group-hover:bg-black/45 transition-colors duration-300 flex flex-col items-center justify-center text-white text-center px-3">
+                  <span className="text-xs sm:text-sm md:text-base font-semibold mb-1">
+                    {item.city}
+                  </span>
+                  <span className="text-[10px] sm:text-xs md:text-sm opacity-90">
+                    {item.price}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-            {/* Scroll to Top Button */}
-            <button
-                onClick={scrollToTop}
-                className={`fixed bottom-8 right-8 z-[2000] p-4 bg-[#071C4B] text-white rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 hover:bg-blue-800 ${showScrollTop ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'
-                    }`}
-                aria-label="Scroll to top"
-            >
-                <FaArrowUp />
+      {/* Testimonials - What Our Customers Say */}
+      <section className="bg-white py-10 md:py-20">
+        <div className="max-w-6xl mx-auto px-4 md:px-6 lg:px-0">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold text-center mb-5 md:mb-10">
+            What Our Customers Say
+          </h2>
+
+          {/* Rating badge - only on mobile (above cards) */}
+          <div className="flex items-center justify-center gap-3 mb-5 md:hidden">
+            <div className="flex gap-1 text-[#fbbf24]">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <FaStar key={i} size={14} />
+              ))}
+            </div>
+            <span className="text-xs font-semibold text-gray-600">
+              4.8 • 409 reviews
+            </span>
+            <FaGoogle className="text-[#4285F4] text-base" />
+          </div>
+
+          <div className="flex flex-col md:flex-row gap-5 md:gap-10 items-start md:items-center">
+            {/* Left rating block — hidden on mobile (shown inline above) */}
+            <div className="hidden md:block w-full md:w-1/4 text-center md:text-left space-y-2 md:pl-6">
+              <div className="text-sm uppercase tracking-wide text-gray-700">
+                EXCELLENT
+              </div>
+              <div className="flex justify-center md:justify-start gap-1 text-[#fbbf24] text-xl">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <FaStar key={i} />
+                ))}
+              </div>
+              <div className="text-xs text-gray-600">Based on 409 reviews</div>
+              <div className="mt-2 flex justify-center md:justify-start items-center gap-2 text-[#4285F4]">
+                <FaGoogle className="text-2xl" />
+                <span className="text-lg font-semibold">Google</span>
+              </div>
+            </div>
+
+            {/* Right testimonials slider mock */}
+            <div className="w-full md:w-3/4 relative">
+              <button className="hidden lg:flex absolute -left-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white shadow-md items-center justify-center text-gray-500 hover:bg-gray-50 z-10 transition-all hover:scale-110">
+                <FaChevronLeft size={14} />
+              </button>
+              <button className="hidden lg:flex absolute -right-4 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-white shadow-md items-center justify-center text-gray-500 hover:bg-gray-50 z-10 transition-all hover:scale-110">
+                <FaChevronRight size={14} />
+              </button>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                {[
+                  {
+                    name: "Atif",
+                    time: "2 weeks ago",
+                    text: "Paid $200 deposit on 19 November for a flight booking. No booking was provided. Refund was refused and voucher offered instead...",
+                  },
+                  {
+                    name: "Manpreet Sandhu",
+                    time: "2 weeks ago",
+                    text: "I had a great experience with HiFi Travel. I would especially like to mention Sandy—she helped me get the right-priced ticket and was very...",
+                  },
+                  {
+                    name: "Lovepreet",
+                    time: "2 weeks ago",
+                    text: "I would like to share my excellent experience with Nisha. She provided outstanding support with my ticket booking and guided me at every step...",
+                  },
+                ].map((t, idx) => (
+                  <div
+                    key={idx}
+                    className="bg-white rounded-xl shadow-[0_8px_24px_rgba(0,0,0,0.08)] p-5 space-y-3"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-purple-500 text-white flex items-center justify-center text-sm font-semibold">
+                          {t.name.charAt(0)}
+                        </div>
+                        <div className="text-left">
+                          <div className="text-sm font-semibold text-gray-900">
+                            {t.name}
+                          </div>
+                          <div className="text-[11px] text-gray-500">
+                            {t.time}
+                          </div>
+                        </div>
+                      </div>
+                      <FaGoogle className="text-[#4285F4]" />
+                    </div>
+
+                    <div className="flex gap-1 text-[#fbbf24] text-xs">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <FaStar key={i} />
+                      ))}
+                    </div>
+
+                    <p className="text-xs text-gray-600 leading-relaxed">
+                      {t.text}
+                    </p>
+                    <button className="text-[11px] font-semibold text-[#0b4ba8] hover:underline">
+                      Read more
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Our Airlines Partners */}
+      <section className="bg-white py-12 md:py-20">
+        <div className="max-w-6xl mx-auto px-4 md:px-6 lg:px-0 text-center">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-semibold mb-6 md:mb-10">
+            Our Airlines Partners
+          </h2>
+
+          {/* Airline logos row - horizontally scrollable on mobile */}
+          <div className="relative flex items-center mb-8 md:mb-10">
+            <button className="hidden md:flex w-8 h-8 rounded-full border border-gray-200 items-center justify-center text-gray-500 hover:bg-gray-50 shrink-0">
+              <FaChevronLeft size={14} />
             </button>
-        </main>
-    );
+            <div className="flex items-center gap-5 sm:gap-8 md:gap-12 overflow-x-auto no-scrollbar justify-start md:justify-center flex-1 py-1 px-1 md:px-4">
+              {[
+                "QANTAS",
+                "THAI",
+                "Air Canada",
+                "Air China",
+                "Hong Kong Airlines",
+                "Cathay Pacific",
+              ].map((name, idx) => (
+                <span
+                  key={idx}
+                  className={`text-xs sm:text-sm md:text-lg font-semibold shrink-0 ${
+                    idx === 1
+                      ? "text-purple-700"
+                      : idx === 3
+                        ? "text-red-700"
+                        : idx === 4
+                          ? "text-red-600"
+                          : idx === 5
+                            ? "text-green-700"
+                            : "text-gray-700"
+                  }`}
+                >
+                  {name}
+                </span>
+              ))}
+            </div>
+            <button className="hidden md:flex w-8 h-8 rounded-full border border-gray-200 items-center justify-center text-gray-500 hover:bg-gray-50 shrink-0">
+              <FaChevronRight size={14} />
+            </button>
+          </div>
+
+          {/* Feature row */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-10 mt-6 text-left md:text-center text-gray-700 text-sm md:text-base">
+            <div className="flex flex-col items-start md:items-center gap-3">
+              <div className="text-[#0b4ba8] text-3xl">
+                <FaDollarSign />
+              </div>
+              <h3 className="font-semibold text-[#111827]">
+                Guaranteed Affordable Pricing
+              </h3>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                We believe everyone deserves to travel without breaking the
+                bank. Our flexible fare options fit your budget, whether
+                you&apos;re planning months in advance or booking last minute.
+              </p>
+            </div>
+
+            <div className="flex flex-col items-start md:items-center gap-3">
+              <div className="text-[#0b4ba8] text-3xl">
+                <FaThumbsUp />
+              </div>
+              <h3 className="font-semibold text-[#111827]">
+                Safe &amp; Secure Booking
+              </h3>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                Your safety and privacy matter. We never share your information
+                with third parties, and your travel details are handled with the
+                utmost confidentiality.
+              </p>
+            </div>
+
+            <div className="flex flex-col items-start md:items-center gap-3 sm:col-span-2 md:col-span-1">
+              <div className="text-[#0b4ba8] text-3xl">
+                <FaMedal />
+              </div>
+              <h3 className="font-semibold text-[#111827]">
+                Reliable Support (9 AM to 10 PM AEST)
+              </h3>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                Travel questions can come up anytime. Our dedicated experts are
+                available daily between 9 AM and 10 PM AEST to assist you.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-[#f7f7f7] py-12 md:py-24">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-0">
+          <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center mb-6 md:mb-10 text-[#071C4B] uppercase tracking-tighter">
+            Popular Destinations
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
+            {[
+              { name: "Adelaide", img: "/1.jpg" },
+              { name: "Brisbane", img: "/2.jpg" },
+              { name: "Cairns", img: "/3.jpg" },
+              { name: "Canberra", img: "/4.jpg" },
+              { name: "Darwin", img: "/5.jpg" },
+              { name: "Gold Coast", img: "/OIP.webp" },
+              { name: "Hobart", img: "/OIP (1).webp" },
+              { name: "Melbourne", img: "/OIP (2).webp" },
+              { name: "Perth", img: "/OIP (3).webp" },
+              { name: "Sydney", img: "/OIP (4).webp" },
+              { name: "India", img: "/OIP (5).webp" },
+              { name: "Pakistan", img: "/OIP (6).webp" },
+              { name: "Sri Lanka", img: "/8.jpg" },
+              { name: "Nepal", img: "/10.jpg" },
+              {
+                name: "Bangladesh",
+                img: "https://images.unsplash.com/photo-1583212292454-1fe6229603b7?q=80&w=400&auto=format&fit=crop",
+              },
+            ].map((city, idx) => (
+              <div
+                key={city.name + idx}
+                className="bg-white rounded-md shadow-[0_6px_18px_rgba(0,0,0,0.12)] overflow-hidden group"
+              >
+                <div className="h-20 sm:h-24 md:h-28 lg:h-32 bg-gray-200 overflow-hidden">
+                  <img
+                    src={city.img}
+                    alt={city.name}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+                </div>
+                <div className="bg-[#0b72e7] text-white text-center py-1.5 md:py-2 text-[10px] sm:text-xs md:text-sm font-semibold">
+                  {city.name}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Footer - Flight routes grid (dark blue) */}
+      <section className="bg-[#00308F] text-white py-8 md:py-16">
+        <div className="max-w-6xl mx-auto px-4 md:px-6 lg:px-0 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-5 md:gap-8 text-xs md:text-sm leading-relaxed">
+          {[
+            {
+              title: "Australia Flight Tickets",
+              items: [
+                "Flights from Sydney",
+                "Flights from Melbourne",
+                "Flights from Brisbane",
+                "Flights from Perth",
+                "Flights from Adelaide",
+              ],
+            },
+            {
+              title: "India Flight Tickets",
+              items: [
+                "Flights to Delhi",
+                "Flights to Mumbai",
+                "Flights to Amritsar",
+                "Flights to Hyderabad",
+                "Flights to Ahmedabad",
+              ],
+            },
+            {
+              title: "Sri Lanka Flight Tickets",
+              items: [
+                "Flights to Colombo",
+                "Flights to Jaffna",
+                "Flights from Sydney",
+                "Flights from Melbourne",
+                "Flights from Perth",
+              ],
+            },
+            {
+              title: "Nepal Flight Tickets",
+              items: [
+                "Flights to Kathmandu",
+                "Flights from Sydney",
+                "Flights from Melbourne",
+                "Flights from Brisbane",
+                "Flights from Adelaide",
+              ],
+            },
+            {
+              title: "Bangladesh Flight Tickets",
+              items: [
+                "Flights to Dhaka",
+                "Flights from Sydney",
+                "Flights from Melbourne",
+                "Flights from Perth",
+                "Flights from Brisbane",
+              ],
+            },
+          ].map((col) => (
+            <div key={col.title}>
+              <h4 className="font-semibold mb-2">{col.title}</h4>
+              <ul className="space-y-1 text-white/80">
+                {col.items.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Main Footer Info (lighter blue) */}
+      <footer className="bg-[#0b4ba8] text-white py-10 md:py-14">
+        <div className="max-w-6xl mx-auto px-4 md:px-6 lg:px-0 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-[2fr,1fr,1.3fr] gap-8 md:gap-10 text-sm">
+          {/* Logo & description */}
+          <div>
+            <div className="text-2xl font-bold mb-3">
+              HiFi <span className="font-normal">Travels</span>
+            </div>
+            <p className="text-white/80 leading-relaxed text-xs md:text-sm">
+              For years, HiFi Travels has been renowned for offering exceptional
+              flight deals, flexible fare options and transparent pricing. With
+              expert travel consultants and personalised service, we&apos;ve
+              earned the trust of thousands of travellers.
+            </p>
+          </div>
+
+          {/* Quick Links */}
+          <div>
+            <h4 className="font-semibold mb-3 text-sm md:text-base">
+              Quick Links
+            </h4>
+            <ul className="space-y-1 text-white/80 text-xs md:text-sm">
+              <li>Home</li>
+              <li>Deals &amp; Promotions</li>
+              <li>Travel Insurance</li>
+              <li>Contact Us</li>
+            </ul>
+          </div>
+
+          {/* Get in Touch */}
+          <div>
+            <h4 className="font-semibold mb-3 text-sm md:text-base">
+              Get In Touch
+            </h4>
+            <p className="text-white/80 text-xs md:text-sm mb-2">
+              LEVEL 10, 3 PARRAMATTA SQ
+              <br />
+              PARRAMATTA, NSW 2150
+            </p>
+            <p className="text-white/80  text-xs md:text-sm mb-1">
+              TEL: +61 2 9067 0888
+            </p>
+            <p className="text-white/80 text-xs md:text-sm">
+              Email: info@hifitravels.com.au
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-8 border-t border-white/20 pt-4 text-center text-[11px] text-white/80">
+          FAQ&apos;s | Privacy Policy | Terms &amp; Conditions
+        </div>
+      </footer>
+
+      {selectedFlight && (
+        <DetailsModal
+          flight={selectedFlight.offer}
+          initialTab={selectedFlight.tab}
+          onClose={() => setSelectedFlight(null)}
+        />
+      )}
+
+      {/* Scroll to Top Button */}
+      <button
+        onClick={scrollToTop}
+        className={`fixed bottom-5 right-5 md:bottom-8 md:right-8 z-[2000] p-3 md:p-4 bg-[#071C4B] text-white rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 hover:bg-blue-800 ${
+          showScrollTop
+            ? "opacity-100 translate-y-0"
+            : "opacity-0 translate-y-10 pointer-events-none"
+        }`}
+        aria-label="Scroll to top"
+      >
+        <FaArrowUp />
+      </button>
+    </main>
+  );
 }
