@@ -161,7 +161,7 @@ export default function HeroSlider({
 
       {/* Search Form Layer - Outside slide overflow to prevent clipping */}
       {children && (
-        <div className="absolute inset-0 z-100 flex flex-col items-center justify-start pointer-events-none pt-12 sm:pt-16 md:pt-20 lg:pt-24">
+        <div className="absolute inset-0 z-100 flex flex-col items-center justify-start pointer-events-none pt-12 sm:pt-16 md:pt-40 lg:pt-24">
           <div className="w-full pointer-events-auto px-4 max-w-7xl mx-auto">
             {children}
           </div>
@@ -169,4 +169,5 @@ export default function HeroSlider({
       )}
     </div>
   );
+
 }
