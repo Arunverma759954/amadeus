@@ -135,6 +135,7 @@ export default function HeroSlider({
         aria-label="Previous slide"
         className="absolute left-1.5 md:left-4 top-1/2 -translate-y-1/2 bg-black/20 hover:bg-black/50 text-white p-2 md:p-3 rounded-full z-40 transition-colors touch-manipulation hidden sm:block"
       >
+        
         <FaChevronLeft size={18} className="md:block" />
       </button>
       <button
