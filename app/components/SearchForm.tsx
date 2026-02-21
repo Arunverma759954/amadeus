@@ -194,21 +194,21 @@ export default function SearchForm({
       <div className="w-full max-w-6xl mx-auto font-sans relative">
         <div className="bg-white rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.18)]">
           {/* Tabs */}
-          <div className="flex border-b border-gray-100 overflow-hidden rounded-t-2xl bg-gray-50/50">
+          <div className="flex border-b border-gray-100 overflow-hidden rounded-t-2xl bg-white">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`flex-1 px-2 md:px-8 py-2.5 md:py-4 text-[8px] sm:text-[9px] md:text-sm font-black tracking-widest flex items-center justify-center gap-1 md:gap-2 transition-all
+                className={`flex-1 px-2 md:px-8 py-3 md:py-5 text-[9px] sm:text-[10px] md:text-sm font-black tracking-widest flex items-center justify-center gap-2 md:gap-3 transition-all
                                 ${
                                   activeTab === tab.id
-                                    ? "bg-[#C41E22] text-white shadow-[0_-4px_10px_rgba(196,30,34,0.2)]"
-                                    : "text-gray-500 hover:bg-gray-100/50"
+                                    ? "bg-[#C41E22] text-white"
+                                    : "text-gray-500 hover:bg-gray-50"
                                 }`}
               >
-                <span className="hidden md:block text-sm">{tab.icon}</span>
-                <span className="uppercase whitespace-nowrap tracking-wider">
-                  {tab.label.split(" ")[0]}
+                <span className="text-sm md:text-lg">{tab.icon}</span>
+                <span className="uppercase whitespace-nowrap tracking-wider font-bold">
+                  {tab.label}
                 </span>
               </button>
             ))}
@@ -384,11 +384,11 @@ export default function SearchForm({
                   id="search-submit-btn"
                   type="submit"
                   disabled={loading || !isFormValid}
-                  className={`w-full sm:w-auto px-8 md:px-10 py-3 md:py-4 rounded-full text-xs md:text-sm font-black uppercase tracking-[0.2em] shadow-xl transition-all
+                  className={`w-full sm:w-auto px-10 md:px-14 py-3 md:py-4 rounded-full text-xs md:text-sm font-black uppercase tracking-[0.2em] shadow-xl transition-all
                                     ${
                                       loading || !isFormValid
                                         ? "bg-gray-300 cursor-not-allowed text-gray-500"
-                                        : "bg-[#f6405f] hover:bg-black hover:scale-105 text-white shadow-red-500/20"
+                                        : "bg-gradient-to-r from-[#f6405f] to-[#ff6b81] hover:shadow-2xl hover:scale-105 text-white"
                                     }`}
                 >
                   {loading ? "Searching..." : "Find a Deal"}
@@ -717,19 +717,15 @@ function InputField({
       )}
 
       {enableAirportAutocomplete && (open || loading) && (
-        <ul className="absolute top-full left-0 right-0 mt-3 min-w-[min(100%,420px)] w-full max-w-[420px] max-h-[min(70vh,480px)] bg-white border-2 border-gray-100 rounded-2xl shadow-[0_20px_60px_rgba(7,28,75,0.2)] overflow-y-auto z-[100] py-3 text-left">
+        <ul className="absolute top-full left-0 right-0 mt-2 min-w-[min(100%,450px)] w-full bg-white border border-gray-100 rounded-xl shadow-[0_15px_50px_rgba(0,0,0,0.15)] overflow-y-auto z-[200] py-2 text-left">
           {loading && options.length === 0 ? (
-            <li className="px-6 py-5 text-base font-medium text-gray-500">
-              Searching airports…
+            <li className="px-6 py-4 text-sm font-medium text-gray-400">
+              Searching...
             </li>
           ) : (
             options.map((opt, idx) => {
               const primaryCity = opt.cityName || opt.name;
-              const primary = primaryCity
-                ? `${primaryCity} ${opt.iataCode ? `(${opt.iataCode.toUpperCase()})` : ""}`.trim()
-                : (opt.iataCode || "").toUpperCase();
-              const secondary =
-                opt.name && opt.name !== primaryCity ? opt.name : "";
+              const code = (opt.iataCode || "").toUpperCase();
               const country = opt.countryName || "";
               const flag = countryCodeToFlag(opt.countryCode);
               return (
@@ -740,34 +736,21 @@ function InputField({
                     handleSelect(opt);
                   }}
                   onMouseEnter={() => setHighlight(idx)}
-                  className={`px-6 py-4 cursor-pointer flex items-center gap-4 border-b border-gray-100 last:border-b-0 transition-colors ${
-                    idx === highlight ? "bg-[#071C4B]/10" : "hover:bg-[#F3F5FB]"
+                  className={`px-5 py-3 cursor-pointer border-b border-gray-50 last:border-b-0 transition-colors ${
+                    idx === highlight ? "bg-[#f6405f]/5" : "hover:bg-gray-50"
                   }`}
                 >
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="text-base md:text-lg font-bold text-[#071C4B] truncate">
-                        {primary}
-                      </span>
-                      {(country || flag) && (
-                        <div className="flex items-center gap-2 shrink-0">
-                          {country && (
-                            <span className="text-sm font-semibold text-gray-600 hidden sm:inline">
-                              {country}
-                            </span>
-                          )}
-                          {flag && (
-                            <span className="text-xl leading-none">{flag}</span>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                    {secondary && (
-                      <span className="text-sm text-gray-500 leading-snug block mt-1 truncate">
-                        {secondary}
-                      </span>
-                    )}
+                  <div className="flex items-center justify-between mb-0.5">
+                    <span className="text-sm md:text-base font-black text-gray-900">
+                      {primaryCity} ({code})
+                    </span>
+                    <span className="text-[10px] md:text-xs font-bold text-gray-400 uppercase tracking-widest">
+                      {country} {flag}
+                    </span>
                   </div>
+                  <p className="text-[10px] md:text-xs text-gray-500 font-medium truncate">
+                    {opt.name}
+                  </p>
                 </li>
               );
             })

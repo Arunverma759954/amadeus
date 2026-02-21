@@ -23,21 +23,21 @@ export default function Header() {
     <header className="w-full font-sans relative">
       {/* Top Strip - Features */}
       <div className="bg-[#002166] text-white py-2 px-4 border-b border-white/5 overflow-x-auto no-scrollbar">
-        <div className="max-w-7xl mx-auto flex gap-6 md:justify-between items-center text-[10px] md:text-[11px] font-bold tracking-wider min-w-max md:min-w-0">
-          <div className="flex items-center gap-2 hover:text-yellow-400 transition-colors cursor-default">
-            <span>🔄</span>
-            <span>Global Links: 🇦🇺 🇳🇿</span>
+        <div className="max-w-7xl mx-auto flex gap-6 md:justify-center lg:justify-between items-center text-[10px] md:text-[11px] font-bold tracking-wider min-w-max md:min-w-0">
+          <div className="flex items-center gap-2 transition-colors cursor-default">
+            <span className="text-blue-400">🌐</span>
+            <span>Global Links: AU NZ</span>
           </div>
-          <div className="flex items-center gap-2 hover:text-yellow-400 transition-colors cursor-default">
+          <div className="flex items-center gap-2 transition-colors cursor-default">
             <FaLock className="text-yellow-400 text-[10px]" />
             <span>Fare Lock</span>
           </div>
-          <div className="flex items-center gap-2 hover:text-yellow-400 transition-colors cursor-default">
-            <FaSync className="text-yellow-400 text-[10px] animate-spin-slow" />
+          <div className="flex items-center gap-2 transition-colors cursor-default">
+            <FaSync className="text-yellow-400 text-[10px]" />
             <span>Free Exchange</span>
           </div>
-          <div className="flex items-center gap-2 hover:text-yellow-400 transition-colors cursor-default">
-            <FaWallet className="text-yellow-400 text-[10px]" />
+          <div className="flex items-center gap-2 transition-colors cursor-default">
+            <span className="text-yellow-400 text-[12px]">■</span>
             <span>Book Now - Pay Later!</span>
           </div>
         </div>
@@ -55,7 +55,7 @@ export default function Header() {
                 className="text-white/80 group-hover:text-white transition-colors shrink-0"
                 size={10}
               />
-              <span className="font-medium tracking-tight hidden sm:inline">
+              <span className="font-medium tracking-tight">
                 info@hifitravels.com.au
               </span>
             </a>
@@ -68,8 +68,8 @@ export default function Header() {
                 className="text-white/80 group-hover:text-white transition-colors shrink-0"
                 size={10}
               />
-              <span className="font-bold tracking-widest text-[#FFD700]">
-                +61 7 3067 8999
+              <span className="font-bold tracking-widest">
+                BNE: +61 7 3067 8999
               </span>
             </a>
           </div>

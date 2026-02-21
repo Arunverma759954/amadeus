@@ -82,25 +82,63 @@ export default function HeroSlider({
       ></div>
 
       {/* Mobile Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-r from-[#071C4B] via-[#071C4B]/80 to-transparent md:hidden z-20"></div>
+      <div className="absolute inset-0 bg-gradient-to-r from-[#071C4B] via-[#071C4B]/60 to-transparent md:hidden z-20"></div>
 
       {/* Content Layer */}
-      <div className="absolute inset-0 z-30 flex flex-col justify-center w-full max-w-7xl mx-auto px-4 pointer-events-none">
-        {/* Floating Elements (Decorative) */}
-        <div className="absolute top-1/2 left-0 w-full h-full hidden md:block">
-          {/* Dots Grid Top Center */}
-          <div className="absolute top-10 left-[40%] grid grid-cols-8 gap-2 opacity-30">
-            {[...Array(32)].map((_, i) => (
+      <div className="absolute inset-0 z-30 flex flex-col justify-center w-full max-w-7xl mx-auto px-6 pointer-events-none">
+        <div className="flex flex-col md:flex-row items-center justify-between w-full">
+          {/* Left Text Content */}
+          <div className="flex flex-col items-start max-w-2xl mt-[-50px] md:mt-0">
+            <h1 className="text-white font-black leading-[1.1]">
+              <span className="block text-[40px] md:text-[70px] lg:text-[90px] uppercase tracking-tighter">
+                TICKETS
+              </span>
+              <span className="block text-[36px] md:text-[60px] lg:text-[75px] uppercase tracking-tighter mt-[-10px]">
+                JUST FOR
+              </span>
+              <span className="block text-[18px] md:text-[28px] lg:text-[32px] uppercase tracking-[0.2em] bg-white text-[#071C4B] px-4 py-2 mt-2">
+                BUDGET FRIENDLY
+              </span>
+            </h1>
+          </div>
+
+          {/* Right Circular Badge */}
+          <div className="hidden md:flex relative group mt-[-80px]">
+            <div className="w-56 h-56 lg:w-72 lg:h-72 bg-white rounded-full flex flex-col items-center justify-center p-8 shadow-2xl relative z-20 border-[6px] border-[#071C4B]">
+              <div className="relative w-full h-24 mb-2">
+                <Image
+                  src="/logo.png"
+                  alt="HiFi Travels"
+                  fill
+                  className="object-contain"
+                />
+              </div>
+              <div className="h-px w-2/3 bg-gray-200 mb-2"></div>
+              <p className="text-[10px] lg:text-[12px] font-black text-[#C41E22] tracking-[0.1em] uppercase text-center leading-tight">
+                FAST. SAFE. UNMATCHED
+              </p>
+            </div>
+            {/* Decorative Pulse Rings */}
+            <div className="absolute inset-0 bg-white/20 rounded-full scale-110 animate-pulse z-10"></div>
+            <div className="absolute inset-0 bg-white/10 rounded-full scale-125 animate-pulse delay-700 z-0"></div>
+          </div>
+        </div>
+
+        {/* Floating Decorative Elements */}
+        <div className="absolute top-0 right-0 w-1/3 h-full hidden md:block">
+          {/* Large Semi-circle Right */}
+          <div className="absolute top-1/2 right-[-10%] translate-y-[-50%] w-[500px] h-[500px] bg-[#071C4B]/20 rounded-full border-[40px] border-white/5"></div>
+
+          {/* Dot Grid Top Left */}
+          <div className="absolute top-[20%] left-[10%] grid grid-cols-6 gap-2 opacity-40">
+            {[...Array(18)].map((_, i) => (
               <div key={i} className="w-1 h-1 bg-white rounded-full"></div>
             ))}
           </div>
 
-          {/* Circles Bottom Left */}
-          <div className="absolute bottom-20 left-10 w-32 h-32 border-4 border-white/10 rounded-full"></div>
-          <div className="absolute bottom-32 left-[-20px] w-20 h-20 border-4 border-white/10 rounded-full"></div>
+          {/* Decorative Circles bottom center */}
+          <div className="absolute bottom-[10%] left-[20%] w-24 h-24 border-2 border-white/20 rounded-full animate-bounce-slow"></div>
         </div>
-
-        {/* Text Content (removed custom overlay text & extra logo so banner images show exactly as designed) */}
       </div>
 
       {/* Controls */}
@@ -137,10 +175,10 @@ export default function HeroSlider({
         ))}
       </div>
 
-      {/* Search Form Container (if passed as children) */}
+      {/* Search Form Centered Over Slider */}
       {children && (
-        <div className="absolute bottom-4 sm:bottom-8 md:bottom-14 left-0 w-full z-40 pointer-events-auto px-3 sm:px-4">
-          {children}
+        <div className="absolute inset-0 z-[100] flex items-center justify-center pointer-events-none pt-20 md:pt-32">
+          <div className="w-full pointer-events-auto">{children}</div>
         </div>
       )}
     </div>

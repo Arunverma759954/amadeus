@@ -772,11 +772,9 @@ export default function Home() {
       <Header />
 
       {/* Hero */}
-      <section className="relative overflow-x-hidden">
-        <HeroSlider />
-        {/* Search form overlaps next section slightly via negative margin */}
-        <div className="relative z-[100] -mt-6 sm:-mt-10 md:-mt-14 flex justify-center px-3 sm:px-4">
-          <div className="w-full max-w-7xl">
+      <section className="relative overflow-visible">
+        <HeroSlider>
+          <div className="w-full max-w-7xl mx-auto">
             <SearchForm
               onResults={handleResults}
               onSearchStart={handleSearchStart}
@@ -784,7 +782,7 @@ export default function Home() {
               autoSearchDate={searchParams?.departureDate}
             />
           </div>
-        </div>
+        </HeroSlider>
       </section>
 
       {/* Info Section */}
