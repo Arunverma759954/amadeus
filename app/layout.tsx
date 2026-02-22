@@ -4,7 +4,12 @@ import { CurrencyProvider } from "@/src/contexts/CurrencyContext";
 export const metadata = {
   title: "Amadeus",
   description: "Flight search application",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=5",
+};
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
 };
 
 export default function RootLayout({

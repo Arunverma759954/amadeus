@@ -157,7 +157,7 @@ export default function ModifySearchForm({ onResults, onSearchStart, onError, in
 
         try {
             const data = await searchFlights(params as unknown as FlightSearchParams);
-            onResults(data, 'flight', params);
+            onResults(data, 'flight', { ...params, tripType });
         } catch (err: any) {
             onError(err.message || "Search failed");
             setLoading(false);
@@ -176,7 +176,9 @@ export default function ModifySearchForm({ onResults, onSearchStart, onError, in
                                 onChange={(e) => setTripType(e.target.value)}
                                 className="appearance-none bg-transparent pr-8 pl-0 py-1 text-sm font-bold text-[#071C4B] outline-none cursor-pointer border-none uppercase tracking-tighter"
                             >
-                                <option value="round">Round Trip</option>
+                                {initialParams?.tripType !== 'oneway' && (
+                                    <option value="round">Round Trip</option>
+                                )}
                                 <option value="oneway">One Way</option>
                             </select>
                             <FaChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 pointer-events-none" />
@@ -257,9 +259,8 @@ export default function ModifySearchForm({ onResults, onSearchStart, onError, in
                                                     setOriginOpen(false);
                                                 }}
                                                 onMouseEnter={() => setOriginHighlight(idx)}
-                                                className={`px-6 py-4 cursor-pointer flex items-center gap-4 border-b border-gray-100 last:border-b-0 transition-colors ${
-                                                    idx === originHighlight ? "bg-[#071C4B]/10" : "hover:bg-[#F3F5FB]"
-                                                }`}
+                                                className={`px-6 py-4 cursor-pointer flex items-center gap-4 border-b border-gray-100 last:border-b-0 transition-colors ${idx === originHighlight ? "bg-[#071C4B]/10" : "hover:bg-[#F3F5FB]"
+                                                    }`}
                                             >
                                                 <div className="flex-1 min-w-0">
                                                     <div className="flex items-center justify-between gap-3">
@@ -351,9 +352,8 @@ export default function ModifySearchForm({ onResults, onSearchStart, onError, in
                                                     setDestOpen(false);
                                                 }}
                                                 onMouseEnter={() => setDestHighlight(idx)}
-                                                className={`px-6 py-4 cursor-pointer flex items-center gap-4 border-b border-gray-100 last:border-b-0 transition-colors ${
-                                                    idx === destHighlight ? "bg-[#071C4B]/10" : "hover:bg-[#F3F5FB]"
-                                                }`}
+                                                className={`px-6 py-4 cursor-pointer flex items-center gap-4 border-b border-gray-100 last:border-b-0 transition-colors ${idx === destHighlight ? "bg-[#071C4B]/10" : "hover:bg-[#F3F5FB]"
+                                                    }`}
                                             >
                                                 <div className="flex-1 min-w-0">
                                                     <div className="flex items-center justify-between gap-3">
@@ -399,6 +399,7 @@ export default function ModifySearchForm({ onResults, onSearchStart, onError, in
                                 name="departureDate"
                                 value={params.departureDate}
                                 onChange={handleChange}
+                                min={new Date().toISOString().split('T')[0]}
                                 className="w-full bg-transparent border-none outline-none text-[10px] font-black text-[#071C4B] p-0"
                             />
                         </div>
@@ -415,6 +416,7 @@ export default function ModifySearchForm({ onResults, onSearchStart, onError, in
                                 value={params.returnDate}
                                 onChange={handleChange}
                                 disabled={tripType === 'oneway'}
+                                min={params.departureDate || new Date().toISOString().split('T')[0]}
                                 className="w-full bg-transparent border-none outline-none text-[10px] font-black text-[#071C4B] p-0 cursor-pointer"
                             />
                         </div>

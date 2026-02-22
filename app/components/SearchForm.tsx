@@ -164,7 +164,7 @@ export default function SearchForm({
           console.error("Failed to log search", logErr);
         }
 
-        onResults(data, "flight", flightParams);
+        onResults(data, "flight", { ...flightParams, tripType });
       } else {
         onError("Hotel search is currently being updated.");
         setLoading(false);
@@ -200,11 +200,10 @@ export default function SearchForm({
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`flex-1 px-2 md:px-8 py-3 md:py-5 text-[9px] sm:text-[10px] md:text-sm font-black tracking-widest flex items-center justify-center gap-2 md:gap-3 transition-all
-                                ${
-                                  activeTab === tab.id
-                                    ? "bg-[#C41E22] text-white"
-                                    : "text-gray-500 hover:bg-gray-50"
-                                }`}
+                                ${activeTab === tab.id
+                    ? "bg-[#C41E22] text-white"
+                    : "text-gray-500 hover:bg-gray-50"
+                  }`}
               >
                 <span className="text-sm md:text-lg">{tab.icon}</span>
                 <span className="uppercase whitespace-nowrap tracking-wider font-bold">
@@ -385,11 +384,10 @@ export default function SearchForm({
                   type="submit"
                   disabled={loading || !isFormValid}
                   className={`w-full sm:w-auto px-10 md:px-14 py-3 md:py-4 rounded-full text-xs md:text-sm font-black uppercase tracking-[0.2em] shadow-xl transition-all
-                                    ${
-                                      loading || !isFormValid
-                                        ? "bg-gray-300 cursor-not-allowed text-gray-500"
-                                        : "bg-linear-to-r from-[#f6405f] to-[#ff6b81] hover:shadow-2xl hover:scale-105 text-white"
-                                    }`}
+                                    ${loading || !isFormValid
+                      ? "bg-gray-300 cursor-not-allowed text-gray-500"
+                      : "bg-linear-to-r from-[#f6405f] to-[#ff6b81] hover:shadow-2xl hover:scale-105 text-white"
+                    }`}
                 >
                   {loading ? "Searching..." : "Find a Deal"}
                 </button>
@@ -736,9 +734,8 @@ function InputField({
                     handleSelect(opt);
                   }}
                   onMouseEnter={() => setHighlight(idx)}
-                  className={`px-5 py-3 cursor-pointer border-b border-gray-50 last:border-b-0 transition-colors ${
-                    idx === highlight ? "bg-[#f6405f]/5" : "hover:bg-gray-50"
-                  }`}
+                  className={`px-5 py-3 cursor-pointer border-b border-gray-50 last:border-b-0 transition-colors ${idx === highlight ? "bg-[#f6405f]/5" : "hover:bg-gray-50"
+                    }`}
                 >
                   <div className="flex items-center justify-between mb-0.5">
                     <span className="text-sm md:text-base font-black text-gray-900">
