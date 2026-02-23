@@ -78,45 +78,8 @@ export default function HeroSlider({
         ></div>
       </div>
 
-      {/* Content Layer (Typography) - Outside slide overflow to allow flex layout */}
+      {/* Content Layer - circular logo removed (logo remains in header top-left) */}
       <div className="absolute inset-0 z-30 flex flex-col justify-start md:justify-center w-full max-w-7xl mx-auto px-6 pointer-events-none pt-20 md:pt-0">
-        <div className="flex flex-col md:flex-row items-center justify-between w-full">
-          {/* Left Text Content */}
-          <div className="flex flex-col items-start max-w-2xl">
-            <h1 className="text-white font-black leading-[1.05]">
-              <span className="block text-[45px] sm:text-[60px] md:text-[70px] lg:text-[90px] uppercase tracking-tighter">
-                TICKETS
-              </span>
-              <span className="block text-[40px] sm:text-[50px] md:text-[60px] lg:text-[75px] uppercase tracking-tighter mt-[-5px] md:mt-[-10px]">
-                JUST FOR
-              </span>
-              <span className="block text-[16px] sm:text-[20px] md:text-[28px] lg:text-[32px] uppercase tracking-[0.2em] bg-white text-[#071C4B] px-3 md:px-4 py-1.5 md:py-2 mt-3 md:mt-2">
-                BUDGET FRIENDLY
-              </span>
-            </h1>
-          </div>
-
-          {/* Right Circular Badge (Desktop) */}
-          <div className="hidden md:flex relative group mt-[-80px]">
-            <div className="w-56 h-56 lg:w-72 lg:h-72 bg-white rounded-full flex flex-col items-center justify-center p-8 shadow-2xl relative z-20 border-[6px] border-[#071C4B]">
-              <div className="relative w-full h-24 mb-2">
-                <Image
-                  src="/logo.png"
-                  alt="HiFi Travels"
-                  fill
-                  className="object-contain"
-                />
-              </div>
-              <div className="h-px w-2/3 bg-gray-200 mb-2"></div>
-              <p className="text-[10px] lg:text-[12px] font-black text-[#C41E22] tracking-widest uppercase text-center leading-tight">
-                FAST. SAFE. UNMATCHED
-              </p>
-            </div>
-            <div className="absolute inset-0 bg-white/20 rounded-full scale-110 animate-pulse z-10"></div>
-            <div className="absolute inset-0 bg-white/10 rounded-full scale-125 animate-pulse delay-700 z-0"></div>
-          </div>
-        </div>
-
         {/* Floating Decorative Elements (Desktop) */}
         <div className="absolute top-0 right-0 w-1/3 h-full hidden md:block">
           <div className="absolute top-1/2 right-[-10%] translate-y-[-50%] w-[500px] h-[500px] bg-[#071C4B]/20 rounded-full border-40 border-white/5"></div>

@@ -761,7 +761,7 @@ function InputField({
 function SelectField({ name, icon, label, value, onChange, options }: any) {
   return (
     <div className="relative group">
-      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors z-10">
+      <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors z-10 pointer-events-none">
         {icon}
       </div>
       <select
@@ -776,8 +776,8 @@ function SelectField({ name, icon, label, value, onChange, options }: any) {
           </option>
         ))}
       </select>
-      <div className="absolute top-1/2 left-4 -translate-y-1/2 z-100 pointer-events-none">
-        <FaChevronDown size={10} />
+      <div className="absolute top-1/2 right-4 -translate-y-1/2 z-10 pointer-events-none text-gray-400">
+        <FaChevronDown size={12} />
       </div>
     </div>
   );

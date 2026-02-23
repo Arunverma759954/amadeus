@@ -97,20 +97,21 @@ export default function Header() {
 
       {/* Main Navbar */}
       <div className="bg-white px-2 md:px-4 shadow-sm border-b border-gray-100 sticky top-0 z-1000 backdrop-blur-md">
-        <div className="max-w-7xl mx-auto flex justify-between items-center h-16 md:h-20 lg:h-22">
-          {/* Logo */}
-          <div className="flex items-center">
-            <a href="/" className="flex flex-col items-start group">
-              <div className="relative w-36 md:w-44 lg:w-48 h-10 md:h-14 lg:h-16 transition-transform duration-500 group-hover:scale-105">
+        <div className="max-w-7xl mx-auto flex justify-between items-center h-16 md:h-20 lg:h-22 min-h-[4rem]">
+          {/* Logo - top left, always visible */}
+          <div className="flex items-center shrink-0">
+            <Link href="/" className="flex items-center group">
+              <div className="relative w-40 md:w-48 lg:w-52 h-10 md:h-12 lg:h-14 min-h-[2.5rem] transition-transform duration-300 group-hover:scale-[1.02]">
                 <Image
                   src="/logo.png"
-                  alt="HiFi Travels"
+                  alt="HiFi Travels - Fast, Safe, Unmatched"
                   fill
                   className="object-contain object-left"
                   priority
+                  sizes="(max-width: 768px) 160px, (max-width: 1024px) 192px, 208px"
                 />
               </div>
-            </a>
+            </Link>
           </div>
 
           {/* Mobile Menu Toggle */}
