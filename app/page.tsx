@@ -742,7 +742,7 @@ export default function Home() {
                             ? "cheapest"
                             : sortBy === "duration"
                               ? "fastest"
-                              : "recommended"
+                              : undefined
                           : undefined;
 
                       return (

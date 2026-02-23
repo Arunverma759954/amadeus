@@ -151,16 +151,16 @@ export default function FlightCard({ offer, dictionaries, onViewDetails, badge, 
     const badgeLabel = badge === 'cheapest' ? 'Cheapest' : badge === 'fastest' ? 'Fastest' : badge === 'recommended' ? 'Recommended' : null;
 
     return (
-        <div className={`group rounded-2xl md:rounded-[1.25rem] overflow-hidden flex flex-col md:flex-row transition-all duration-300 mb-5 relative ${variant === 'alt' ? 'bg-gray-50/60 border border-gray-100' : 'bg-white border border-gray-100'} ${badge ? 'shadow-[0_4px_20px_rgba(7,28,75,0.1)] ring-1 ring-[#071C4B]/10' : 'shadow-[0_2px_12px_rgba(7,28,75,0.06)]'} hover:shadow-[0_12px_40px_rgba(7,28,75,0.12)] hover:border-[#071C4B]/10`}>
-            {badgeLabel && (
-                <div className="absolute top-3 right-3 z-10 px-2.5 py-1 rounded-lg bg-[#071C4B] text-white text-[9px] font-black uppercase tracking-wider shadow-sm">
-                    {badgeLabel}
-                </div>
-            )}
-            {/* Left: Flight Details */}
-            <div className="flex-[1.6] p-5 md:p-6 flex flex-col justify-between border-b md:border-b-0 md:border-r border-gray-100/80">
-                {/* Airline row + times */}
-                <div className="flex items-start justify-between gap-4 mb-4">
+        <div className={`group rounded-2xl md:rounded-[1.25rem] overflow-hidden flex flex-col md:flex-row transition-all duration-300 mb-5 bg-white border border-gray-100 ${badge ? 'shadow-[0_4px_20px_rgba(7,28,75,0.1)] ring-1 ring-[#071C4B]/10' : 'shadow-[0_2px_12px_rgba(7,28,75,0.06)]'} hover:shadow-[0_12px_40px_rgba(7,28,75,0.12)] hover:border-[#071C4B]/10`}>
+            {/* Left: Flight Details - badge lives here so it never overlaps the price panel */}
+            <div className={`flex-[1.6] p-5 md:p-6 flex flex-col justify-between border-b md:border-b-0 md:border-r border-gray-100/80 relative ${badgeLabel ? 'pt-10 pr-20 md:pt-12 md:pr-6' : ''}`}>
+                {badgeLabel && (
+                    <div className="absolute top-3 right-3 z-10 px-2.5 py-1 rounded-lg bg-[#071C4B] text-white text-[9px] font-black uppercase tracking-wider shadow-sm whitespace-nowrap">
+                        {badgeLabel}
+                    </div>
+                )}
+                {/* Airline row + times - extra top margin when badge so 19:35/BOM don't stick to badge; right padding so times don't sit under badge */}
+                <div className={`flex items-start justify-between gap-4 mb-4 ${badgeLabel ? 'mt-1 pr-16 md:mt-0 md:pr-0' : ''}`}>
                     <div className="flex items-center gap-3 shrink-0">
                         <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gray-50 flex items-center justify-center overflow-hidden border border-gray-100 shrink-0">
                             <img
