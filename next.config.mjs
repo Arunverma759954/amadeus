@@ -7,8 +7,14 @@ const nextConfig = {
     // !! WARN !!
     ignoreBuildErrors: true,
   },
-  // Note: ESLint is no longer configured here in this version.
-  // We use /* eslint-disable */ in files or skip linting via environment variables if needed.
+  async rewrites() {
+    return [
+      {
+        source: '/admin-panel/:path*',
+        destination: '/admin-panel/index.html',
+      },
+    ];
+  },
 };
 
 export default nextConfig;
