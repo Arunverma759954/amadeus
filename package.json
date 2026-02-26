@@ -6,7 +6,8 @@
     "dev": "concurrently \"next dev\" \"cd admin-panel && npm run dev\"",
     "dev:main": "next dev",
     "dev:admin": "cd admin-panel && npm run dev",
-    "build": "cd admin-panel && npm run build && next build",
+    "build": "cd admin-panel && npm run build && cd .. && next build",
+    "postinstall": "cd admin-panel && npm install",
     "start": "next start",
     "lint": "eslint"
   },
