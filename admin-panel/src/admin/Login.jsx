@@ -113,7 +113,7 @@ const Login = () => {
 
                 <div className="text-center mb-6 sm:mb-8">
                     <h1 className="text-2xl sm:text-3xl font-black italic tracking-tighter text-white mb-2">
-                        AMADEUS <span className="text-blue-400">ADMIN</span>
+                        HIFI <span className="text-blue-400">ADMIN</span>
                     </h1>
                     <p className="text-gray-300 font-medium">Admin Access Portal</p>
                 </div>

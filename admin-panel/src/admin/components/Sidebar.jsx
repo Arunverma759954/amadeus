@@ -44,7 +44,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                     </div>
                     <div className="min-w-0">
                         <h1 className="text-lg sm:text-xl md:text-2xl font-bold tracking-tight text-slate-900 dark:text-white truncate">
-                            Amadeus <span className="text-indigo-600">Admin</span>
+                            HiFi Travels <span className="text-indigo-600">Admin</span>
                         </h1>
                         <p className="text-[10px] sm:text-xs font-semibold uppercase tracking-widest text-slate-400">
                             Voyage Management
