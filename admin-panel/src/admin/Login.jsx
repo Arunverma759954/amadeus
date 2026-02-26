@@ -9,7 +9,9 @@ const ALLOWED_ADMIN_EMAILS = [
     'arunverma759959@gmail.com',
 ];
 
-const RESET_REDIRECT = 'http://localhost:3000/auth/reset-password';
+const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+const MAIN_SITE_URL = isLocal ? 'http://localhost:3000' : window.location.origin;
+const RESET_REDIRECT = `${MAIN_SITE_URL}/auth/reset-password`;
 
 const Login = () => {
     const [email, setEmail] = useState("");
@@ -186,7 +188,7 @@ const Login = () => {
 
                 <p className="mt-8 text-center text-gray-400 text-sm">
                     Not an admin?{" "}
-                    <a href="http://localhost:3000" className="text-blue-400 font-bold hover:underline">
+                    <a href={MAIN_SITE_URL} className="text-blue-400 font-bold hover:underline">
                         Go to Main Site
                     </a>
                 </p>

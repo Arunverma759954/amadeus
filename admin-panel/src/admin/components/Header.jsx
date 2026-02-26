@@ -23,7 +23,7 @@ const Header = ({ sidebarOpen, setSidebarOpen }) => {
         setTimeout(() => {
             localStorage.removeItem('isAuthenticated');
             localStorage.removeItem('user');
-            window.location.href = '/admin/login';
+            window.location.href = window.location.origin + '/admin-panel/admin/login';
         }, 1500); // 1.5 seconds duration
     };
 
@@ -72,7 +72,7 @@ const Header = ({ sidebarOpen, setSidebarOpen }) => {
                         </div>
                     </div>
 
-                        <div className="flex items-center gap-2 sm:gap-4 md:gap-6 shrink-0">
+                    <div className="flex items-center gap-2 sm:gap-4 md:gap-6 shrink-0">
                         <div className="flex items-center gap-1 sm:gap-3 border-r border-slate-200 pr-3 sm:pr-6 dark:border-slate-800">
                             {/* Theme Toggler */}
                             <button

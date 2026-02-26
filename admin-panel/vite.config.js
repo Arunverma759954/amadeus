@@ -8,4 +8,9 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  base: '/admin-panel/',
+  build: {
+    outDir: '../public/admin-panel',
+    emptyOutDir: true
+  }
 })

@@ -54,7 +54,7 @@ function App() {
   }, []);
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename="/admin-panel">
       <Routes>
         <Route path="/" element={<Navigate to="/admin" replace />} />
 

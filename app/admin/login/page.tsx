@@ -41,7 +41,12 @@ export default function AdminLoginPage() {
             const adminEmail = encodeURIComponent(data.user?.email || '');
 
             // Redirect to the integrated panel with magic auth params
-            window.location.href = `http://localhost:5173/admin/login?magic_auth=true&name=${adminName}&email=${adminEmail}`;
+            // When live, the admin panel is served at /admin-panel/
+            const isLocal = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+            const adminBase = isLocal ? 'http://localhost:5173' : '';
+            const adminUrl = process.env.NEXT_PUBLIC_ADMIN_URL || adminBase;
+
+            window.location.href = `${adminUrl}/admin-panel/admin/login?magic_auth=true&name=${adminName}&email=${adminEmail}`;
         } catch (err: any) {
             console.error("Admin Login Error:", err);
             setError(err.message || "Failed to login as admin");
