@@ -2,8 +2,8 @@ import "./globals.css";
 import { CurrencyProvider } from "@/src/contexts/CurrencyContext";
 
 export const metadata = {
-  title: "Amadeus",
-  description: "Flight search application",
+  title: "Home - Cheap Domestic and International Flight Tickets | HiFi Travels",
+  description: "HiFi Travels - Your Trusted Travel Partner for Cheap Domestic and International Flights.",
 };
 
 export const viewport = {
