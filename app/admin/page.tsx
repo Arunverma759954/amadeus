@@ -8,7 +8,9 @@ export default function AdminRedirect() {
 
     useEffect(() => {
         // Redirect users who visit /admin to the integrated panel
-        window.location.href = "http://localhost:5173/admin";
+        const isLocal = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+        const adminUrl = isLocal ? 'http://localhost:5173' : '';
+        window.location.href = `${adminUrl}/admin-panel/admin`;
     }, []);
 
     return (

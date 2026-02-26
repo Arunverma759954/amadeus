@@ -41,7 +41,9 @@ export default function ResetPasswordPage() {
             if (updateError) throw updateError;
             setSuccess(true);
             setTimeout(() => {
-                window.location.href = "http://localhost:5173/admin/login";
+                const isLocal = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+                const adminUrl = isLocal ? 'http://localhost:5173' : '';
+                window.location.href = `${adminUrl}/admin-panel/admin/login`;
             }, 2000);
         } catch (err: any) {
             setError(err.message || "Failed to set password.");
@@ -59,12 +61,16 @@ export default function ResetPasswordPage() {
                     <p className="text-slate-600 mb-6">
                         Password reset links are valid for a short time. Request a new one from the admin login page.
                     </p>
-                    <Link
-                        href="http://localhost:5173/admin/login"
+                    <button
+                        onClick={() => {
+                            const isLocal = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+                            const adminUrl = isLocal ? 'http://localhost:5173' : '';
+                            window.location.href = `${adminUrl}/admin-panel/admin/login`;
+                        }}
                         className="inline-flex items-center gap-2 bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-indigo-700"
                     >
                         <FaArrowLeft /> Go to Admin Login
-                    </Link>
+                    </button>
                 </div>
             </div>
         );
@@ -130,9 +136,16 @@ export default function ResetPasswordPage() {
                     </button>
                 </form>
                 <p className="mt-6 text-center text-sm text-slate-500">
-                    <Link href="http://localhost:5173/admin/login" className="text-indigo-600 hover:underline">
+                    <button
+                        onClick={() => {
+                            const isLocal = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+                            const adminUrl = isLocal ? 'http://localhost:5173' : '';
+                            window.location.href = `${adminUrl}/admin-panel/admin/login`;
+                        }}
+                        className="text-indigo-600 hover:underline"
+                    >
                         Back to Admin Login
-                    </Link>
+                    </button>
                 </p>
             </div>
         </div>
