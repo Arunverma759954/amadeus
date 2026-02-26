@@ -6,8 +6,10 @@ const AMADEUS_BASE = process.env.AMADEUS_BASE_URL || "https://api.amadeus.com";
 async function getAmadeusToken(): Promise<string> {
     const clientId = process.env.AMADEUS_CLIENT_ID;
     const clientSecret = process.env.AMADEUS_CLIENT_SECRET;
-    if (!clientId || !clientSecret) {
-        throw new Error("AMADEUS_CLIENT_ID and AMADEUS_CLIENT_SECRET must be set in environment");
+    const isPlaceholder = clientId === "your_amadeus_client_id" || clientSecret === "your_amadeus_client_secret";
+
+    if (!clientId || !clientSecret || isPlaceholder) {
+        throw new Error("AMADEUS_CLIENT_ID and AMADEUS_CLIENT_SECRET are not configured or using placeholders in .env.local");
     }
     const body = new URLSearchParams({
         grant_type: "client_credentials",
@@ -46,10 +48,13 @@ export async function GET(request: NextRequest) {
         );
     }
 
-    // If Amadeus credentials are not set, return empty data so frontend uses its static list (no 500)
+    // If Amadeus credentials are not set or are placeholders, return empty data so frontend uses its static list (no 500)
     const clientId = process.env.AMADEUS_CLIENT_ID;
     const clientSecret = process.env.AMADEUS_CLIENT_SECRET;
-    if (!clientId || !clientSecret) {
+    const isPlaceholder = clientId === "your_amadeus_client_id" || clientSecret === "your_amadeus_client_secret";
+
+    if (!clientId || !clientSecret || isPlaceholder) {
+        console.warn("Amadeus credentials are missing or using placeholders. Airport autocomplete will be limited.");
         return NextResponse.json({ data: [] });
     }
 

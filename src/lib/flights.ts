@@ -6,6 +6,7 @@ export interface FlightSearchParams {
     destination: string;
     departureDate: string;
     adults: number;
+    legs?: any[];
 }
 
 import { supabase } from "@/src/lib/supabase";

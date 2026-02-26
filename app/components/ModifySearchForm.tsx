@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { FaPlane, FaMapMarkerAlt, FaCalendarAlt, FaUserFriends, FaChevronDown, FaExchangeAlt, FaSearch } from "react-icons/fa";
+import { FaPlane, FaMapMarkerAlt, FaCalendarAlt, FaUserFriends, FaChevronDown, FaExchangeAlt, FaSearch, FaTimes } from "react-icons/fa";
 import { searchFlights, FlightSearchParams } from "@/src/lib/flights";
 
 interface ModifySearchFormProps {
@@ -28,6 +28,7 @@ export default function ModifySearchForm({ onResults, onSearchStart, onError, in
         children: initialParams?.children || 0,
         infant: initialParams?.infant || 0,
         cabin: initialParams?.cabin || "Economy",
+        legs: initialParams?.legs || []
     });
     const [originDisplay, setOriginDisplay] = useState<string>(params.origin);
     const [destDisplay, setDestDisplay] = useState<string>(params.destination);
@@ -139,6 +140,32 @@ export default function ModifySearchForm({ onResults, onSearchStart, onError, in
         }
     };
 
+    const handleLegChange = (index: number, field: string, value: string) => {
+        const newLegs = [...(params.legs || [])];
+        if (newLegs[index]) {
+            newLegs[index] = { ...newLegs[index], [field]: value };
+            setParams(prev => ({ ...prev, legs: newLegs }));
+        }
+    };
+
+    const addLeg = () => {
+        const currentLegs = params.legs || [];
+        if (currentLegs.length < 5) {
+            const lastLeg = currentLegs[currentLegs.length - 1] || { origin: params.destination, destination: "", departureDate: params.departureDate };
+            setParams(prev => ({
+                ...prev,
+                legs: [...currentLegs, { origin: lastLeg.destination, destination: "", departureDate: lastLeg.departureDate }]
+            }));
+        }
+    };
+
+    const removeLeg = (index: number) => {
+        const currentLegs = params.legs || [];
+        if (currentLegs.length > 2) {
+            setParams(prev => ({ ...prev, legs: currentLegs.filter((_: any, i: number) => i !== index) }));
+        }
+    };
+
     const handleSwap = () => {
         setParams(prev => ({
             ...prev,
@@ -156,7 +183,13 @@ export default function ModifySearchForm({ onResults, onSearchStart, onError, in
         setLoading(true);
 
         try {
-            const data = await searchFlights(params as unknown as FlightSearchParams);
+            if (tripType === 'multicity') {
+                // Validation
+                if (!params.legs || params.legs.length < 2) throw new Error("Please add at least 2 flights");
+                const incomplete = params.legs.some((l: any) => !l.origin || !l.destination || !l.departureDate);
+                if (incomplete) throw new Error("Please fill all fields for all flights");
+            }
+            const data = await searchFlights({ ...params, tripType } as unknown as FlightSearchParams);
             onResults(data, 'flight', { ...params, tripType });
         } catch (err: any) {
             onError(err.message || "Search failed");
@@ -180,6 +213,7 @@ export default function ModifySearchForm({ onResults, onSearchStart, onError, in
                                     <option value="round">Round Trip</option>
                                 )}
                                 <option value="oneway">One Way</option>
+                                <option value="multicity">Multi-City</option>
                             </select>
                             <FaChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 pointer-events-none" />
                         </div>
@@ -436,7 +470,7 @@ export default function ModifySearchForm({ onResults, onSearchStart, onError, in
                         </div>
 
                         {showTravellerPicker && (
-                            <div className="absolute top-[calc(100%+12px)] right-0 left-0 sm:left-auto w-auto sm:w-80 bg-white shadow-2xl rounded-2xl p-6 z-[100] border border-gray-100 animate-in fade-in slide-in-from-top-2 duration-200">
+                            <div className="absolute top-[calc(100%+12px)] right-0 left-0 sm:left-auto w-[280px] sm:w-80 bg-white shadow-2xl rounded-2xl p-6 z-[1000] border border-gray-100 animate-in fade-in slide-in-from-top-2 duration-200">
                                 <div className="space-y-4">
                                     {[
                                         { key: 'adults', label: 'Adults', sub: '12+ years' },
@@ -496,10 +530,57 @@ export default function ModifySearchForm({ onResults, onSearchStart, onError, in
                             disabled={loading}
                             className="w-full bg-[#f6405f] text-white hover:bg-black transition-all py-3.5 px-4 rounded-lg font-black text-[11px] uppercase tracking-widest flex items-center justify-center shadow-lg shadow-red-900/10 h-full min-h-[48px]"
                         >
-                            {loading ? "..." : <><FaSearch className="mr-2 shrink-0 text-xs" /> Search</>}
+                            {loading ? "..." : <><FaSearch className="mr-2 shrink-0 text-xs" /> Update</>}
                         </button>
                     </div>
                 </div>
+
+                {/* Multi-city legs area (shows only when multicity is active) */}
+                {tripType === 'multicity' && (
+                    <div className="pt-2 border-t border-gray-50 mt-2 space-y-2">
+                        <div className="flex flex-wrap gap-2">
+                            {(params.legs || []).map((leg: any, idx: number) => (
+                                <div key={idx} className="flex items-center gap-2 bg-gray-50 p-2 rounded-lg border border-gray-100 text-[10px] font-bold">
+                                    <span className="w-5 h-5 rounded-full bg-[#071C4B] text-white flex items-center justify-center text-[8px]">{idx + 1}</span>
+                                    <input
+                                        type="text"
+                                        placeholder="From"
+                                        value={leg.origin}
+                                        onChange={(e) => handleLegChange(idx, 'origin', e.target.value.toUpperCase())}
+                                        className="w-12 bg-transparent border-none outline-none uppercase text-[#071C4B]"
+                                    />
+                                    <FaExchangeAlt size={8} className="text-gray-300" />
+                                    <input
+                                        type="text"
+                                        placeholder="To"
+                                        value={leg.destination}
+                                        onChange={(e) => handleLegChange(idx, 'destination', e.target.value.toUpperCase())}
+                                        className="w-12 bg-transparent border-none outline-none uppercase text-[#071C4B]"
+                                    />
+                                    <input
+                                        type="date"
+                                        value={leg.departureDate}
+                                        onChange={(e) => handleLegChange(idx, 'departureDate', e.target.value)}
+                                        className="bg-transparent border-none outline-none text-gray-500 font-medium"
+                                    />
+                                    {params.legs.length > 2 && (
+                                        <button type="button" onClick={() => removeLeg(idx)} className="text-gray-300 hover:text-red-500 ml-1">
+                                            <FaTimes size={10} />
+                                        </button>
+                                    )}
+                                </div>
+                            ))}
+                            <button
+                                type="button"
+                                onClick={addLeg}
+                                disabled={(params.legs || []).length >= 5}
+                                className="px-3 py-2 border border-dashed border-gray-200 rounded-lg text-[10px] text-gray-400 hover:border-[#f6405f] hover:text-[#f6405f] transition-all"
+                            >
+                                + Add Leg
+                            </button>
+                        </div>
+                    </div>
+                )}
             </form>
         </div>
     );

@@ -32,7 +32,7 @@ import {
   FaTimes,
   FaArrowUp,
 } from "react-icons/fa";
-import { formatCurrency } from "@/src/lib/currency";
+import { formatCurrency, convertCurrency } from "@/src/lib/currency";
 import { useDisplayCurrency } from "@/src/contexts/CurrencyContext";
 
 type TopDestination = {
@@ -84,6 +84,9 @@ export default function Home() {
   const [refundableOnly, setRefundableOnly] = useState(false);
   const [baggageOnly, setBaggageOnly] = useState(false);
   const [maxPrice, setMaxPrice] = useState<number | null>(null);
+  const [minPrice, setMinPrice] = useState<number>(0);
+  const [absMaxPrice, setAbsMaxPrice] = useState<number>(10000);
+  const [resultsCurrency, setResultsCurrency] = useState<string>("AUD");
   const [showFilters, setShowFilters] = useState(false);
   const [isMobileFiltersOpen, setIsMobileFiltersOpen] = useState(false);
   const [searchParams, setSearchParams] = useState<any>(null); // Store current search params for slider use
@@ -209,13 +212,22 @@ export default function Home() {
     setIsRefreshing(false);
     if (params) setSearchParams(params);
 
-    // Auto-set max price based on new results (including markup)
+    // Auto-set max price based on new results (converted to display currency)
     if (flights.length > 0) {
-      const high = Math.max(
-        ...flights.map((r: any) => parseFloat(r.price.total)),
-      );
-      const adjustedHigh = high * (1 + pricingAdjustment / 100);
-      setMaxPrice(Math.ceil(adjustedHigh));
+      const apiCurrency = flights[0].price.currency || "AUD";
+      setResultsCurrency(apiCurrency);
+
+      const pricesInDisplayCurrency = flights.map((r: any) => {
+        const { value } = convertCurrency(r.price.total, apiCurrency, displayCurrency);
+        return value * (1 + pricingAdjustment / 100);
+      });
+
+      const high = Math.max(...pricesInDisplayCurrency);
+      const roundedHigh = Math.ceil(high);
+
+      setMaxPrice(roundedHigh);
+      setAbsMaxPrice(roundedHigh);
+      setMinPrice(0);
     }
   };
 
@@ -267,7 +279,7 @@ export default function Home() {
           id: offer.id,
           airline:
             dictionaries?.carriers?.[
-              offer.itineraries[0].segments[0].carrierCode
+            offer.itineraries[0].segments[0].carrierCode
             ] || offer.itineraries[0].segments[0].carrierCode,
           origin: offer.itineraries[0].segments[0].departure.iataCode,
           destination:
@@ -330,14 +342,17 @@ export default function Home() {
       });
     }
 
-    // 5. Filter by Max Price
-    if (maxPrice !== null) {
-      fr = fr.filter((item) => {
-        const adjusted =
-          parseFloat(item.price.total) * (1 + pricingAdjustment / 100);
-        return adjusted <= maxPrice;
-      });
-    }
+    // 5. Filter by Min/Max Price (Working in displayCurrency)
+    fr = fr.filter((item) => {
+      const apiCurrency = item.price.currency || resultsCurrency || "AUD";
+      const { value: priceInDisplay } = convertCurrency(item.price.total, apiCurrency, displayCurrency);
+      const adjusted = priceInDisplay * (1 + pricingAdjustment / 100);
+
+      const isAboveMin = adjusted >= minPrice;
+      const isBelowMax = maxPrice !== null ? adjusted <= maxPrice : true;
+
+      return isAboveMin && isBelowMax;
+    });
 
     // 6. Sort
     if (sortBy === "price") {
@@ -430,7 +445,8 @@ export default function Home() {
                         setTimeSlots([]);
                         setRefundableOnly(false);
                         setBaggageOnly(false);
-                        setMaxPrice(null);
+                        setMaxPrice(absMaxPrice);
+                        setMinPrice(0);
                       }}
                       className="text-[10px] font-bold text-[#071C4B] hover:underline uppercase"
                     >
@@ -485,20 +501,52 @@ export default function Home() {
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
                       <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                        Max Budget
+                        Min Budget
                       </h4>
                       <span className="text-[10px] font-black text-[#071C4B] bg-blue-50 px-2 py-0.5 rounded">
-                        {formatCurrency(maxPrice || 0, "AUD", displayCurrency)}
+                        {formatCurrency(minPrice, resultsCurrency, displayCurrency)}
                       </span>
                     </div>
                     <input
                       type="range"
                       min="0"
-                      max={maxPrice ? Math.max(maxPrice, 10000) : 10000}
+                      max={absMaxPrice}
                       step="100"
-                      value={maxPrice || 10000}
-                      onChange={(e) => setMaxPrice(parseInt(e.target.value))}
-                      className="w-full h-1.5 bg-gray-100 rounded-full appearance-none cursor-pointer accent-[#071C4B]"
+                      value={minPrice}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value);
+                        setMinPrice(val);
+                        if (maxPrice !== null && val > maxPrice) {
+                          setMaxPrice(val);
+                        }
+                      }}
+                      className="w-full h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-[#071C4B]"
+                    />
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                        Max Budget
+                      </h4>
+                      <span className="text-[10px] font-black text-[#071C4B] bg-blue-50 px-2 py-0.5 rounded">
+                        {formatCurrency(maxPrice ?? absMaxPrice, resultsCurrency, displayCurrency)}
+                      </span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max={absMaxPrice}
+                      step="100"
+                      value={maxPrice ?? absMaxPrice}
+                      onChange={(e) => {
+                        const val = parseInt(e.target.value);
+                        setMaxPrice(val);
+                        if (val < minPrice) {
+                          setMinPrice(val);
+                        }
+                      }}
+                      className="w-full h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-[#071C4B]"
                     />
                   </div>
 
@@ -523,11 +571,10 @@ export default function Home() {
                                 : [...prev, slot.id],
                             )
                           }
-                          className={`py-3 rounded-2xl border flex flex-col items-center gap-1 transition-all ${
-                            timeSlots.includes(slot.id)
-                              ? "bg-[#071C4B] text-white border-[#071C4B] shadow-md shadow-blue-900/20"
-                              : "bg-white text-gray-400 border-gray-100 hover:border-gray-300"
-                          }`}
+                          className={`py-3 rounded-2xl border flex flex-col items-center gap-1 transition-all ${timeSlots.includes(slot.id)
+                            ? "bg-[#071C4B] text-white border-[#071C4B] shadow-md shadow-blue-900/20"
+                            : "bg-white text-gray-400 border-gray-100 hover:border-gray-300"
+                            }`}
                         >
                           <span className="text-sm">{slot.icon}</span>
                           <span className="text-[8px] font-black uppercase tracking-tighter">
@@ -610,15 +657,15 @@ export default function Home() {
                       const baseP =
                         results?.length > 0
                           ? Math.min(
-                              ...results.map((r: any) =>
-                                parseFloat(r.price.total),
-                              ),
-                            )
+                            ...results.map((r: any) =>
+                              parseFloat(r.price.total),
+                            ),
+                          )
                           : 800;
                       const estP = Math.round(
                         baseP *
-                          (1 + pricingAdjustment / 100) *
-                          (1 + (Math.random() * 0.1 - 0.05)),
+                        (1 + pricingAdjustment / 100) *
+                        (1 + (Math.random() * 0.1 - 0.05)),
                       );
 
                       return (
@@ -640,7 +687,7 @@ export default function Home() {
                           <span
                             className={`text-[8px] font-bold ${isSelected ? "text-white/90" : "text-emerald-600"}`}
                           >
-                            {formatCurrency(estP, "AUD", displayCurrency)}
+                            {formatCurrency(estP, resultsCurrency, displayCurrency)}
                           </span>
                         </button>
                       );
@@ -711,6 +758,7 @@ export default function Home() {
                           setMaxStops(null);
                           setTimeSlots([]);
                           setMaxPrice(null);
+                          setMinPrice(0);
                         }}
                         className="mt-6 px-6 py-2.5 bg-[#071C4B] text-white rounded-xl font-bold text-xs uppercase tracking-wider shadow-lg shadow-[#071C4B]/15"
                       >
@@ -762,8 +810,8 @@ export default function Home() {
               </div>
             </div>
           </div>
-        </div>
-      </main>
+        </div >
+      </main >
     );
   }
 
@@ -1048,17 +1096,16 @@ export default function Home() {
               ].map((name, idx) => (
                 <span
                   key={idx}
-                  className={`text-xs sm:text-sm md:text-lg font-semibold shrink-0 ${
-                    idx === 1
-                      ? "text-purple-700"
-                      : idx === 3
-                        ? "text-red-700"
-                        : idx === 4
-                          ? "text-red-600"
-                          : idx === 5
-                            ? "text-green-700"
-                            : "text-gray-700"
-                  }`}
+                  className={`text-xs sm:text-sm md:text-lg font-semibold shrink-0 ${idx === 1
+                    ? "text-purple-700"
+                    : idx === 3
+                      ? "text-red-700"
+                      : idx === 4
+                        ? "text-red-600"
+                        : idx === 5
+                          ? "text-green-700"
+                          : "text-gray-700"
+                    }`}
                 >
                   {name}
                 </span>
@@ -1292,11 +1339,10 @@ export default function Home() {
       {/* Scroll to Top Button */}
       <button
         onClick={scrollToTop}
-        className={`fixed bottom-5 right-5 md:bottom-8 md:right-8 z-[2000] p-3 md:p-4 bg-[#071C4B] text-white rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 hover:bg-blue-800 ${
-          showScrollTop
-            ? "opacity-100 translate-y-0"
-            : "opacity-0 translate-y-10 pointer-events-none"
-        }`}
+        className={`fixed bottom-5 right-5 md:bottom-8 md:right-8 z-[2000] p-3 md:p-4 bg-[#071C4B] text-white rounded-full shadow-lg transition-all duration-300 transform hover:scale-110 hover:bg-blue-800 ${showScrollTop
+          ? "opacity-100 translate-y-0"
+          : "opacity-0 translate-y-10 pointer-events-none"
+          }`}
         aria-label="Scroll to top"
       >
         <FaArrowUp />

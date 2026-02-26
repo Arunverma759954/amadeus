@@ -16,6 +16,7 @@ import {
   FaWhatsapp,
   FaPhoneAlt,
   FaCheckCircle,
+  FaTimes,
 } from "react-icons/fa";
 import { supabase } from "@/src/lib/supabase";
 
@@ -68,6 +69,11 @@ export default function SearchForm({
     email: "arun@example.com",
     phone: "1234567890",
   });
+
+  const [legs, setLegs] = useState<any[]>([
+    { origin: "DEL", destination: "BOM", departureDate: todayIso },
+    { origin: "BOM", destination: "BLR", departureDate: defaultReturnIso },
+  ]);
 
   // Custom Date Picker State
   const [showDeparturePicker, setShowDeparturePicker] = useState(false);
@@ -129,6 +135,32 @@ export default function SearchForm({
     else setShowReturnPicker(false);
   };
 
+  const handleLegChange = (index: number, field: string, value: string) => {
+    const newLegs = [...legs];
+    newLegs[index] = { ...newLegs[index], [field]: value };
+    setLegs(newLegs);
+  };
+
+  const addLeg = () => {
+    if (legs.length < 5) {
+      const lastLeg = legs[legs.length - 1];
+      setLegs([
+        ...legs,
+        {
+          origin: lastLeg.destination,
+          destination: "",
+          departureDate: lastLeg.departureDate,
+        },
+      ]);
+    }
+  };
+
+  const removeLeg = (index: number) => {
+    if (legs.length > 2) {
+      setLegs(legs.filter((_, i) => i !== index));
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     onSearchStart();
@@ -136,14 +168,28 @@ export default function SearchForm({
 
     try {
       if (activeTab === "flight") {
-        if (
-          !flightParams.origin ||
-          !flightParams.destination ||
-          !flightParams.departureDate
-        ) {
-          throw new Error("Please fill in all required flight fields");
+        if (tripType === "multicity") {
+          // Validate legs
+          for (const leg of legs) {
+            if (!leg.origin || !leg.destination || !leg.departureDate) {
+              throw new Error("Please fill in all fields for all flight legs");
+            }
+          }
+          // For now, we'll send the first leg or handle multi-city logic if supported by edge function
+          // If the backend supports an array of legs, we'd send: { ...flightParams, tripType, legs }
+          const data = await searchFlights({ ...flightParams, legs });
+          onResults(data, "flight", { ...flightParams, tripType, legs });
+        } else {
+          if (
+            !flightParams.origin ||
+            !flightParams.destination ||
+            !flightParams.departureDate
+          ) {
+            throw new Error("Please fill in all required flight fields");
+          }
+          const data = await searchFlights(flightParams);
+          onResults(data, "flight", { ...flightParams, tripType });
         }
-        const data = await searchFlights(flightParams);
 
         // Real-time Analytics: Log search event
         try {
@@ -164,7 +210,7 @@ export default function SearchForm({
           console.error("Failed to log search", logErr);
         }
 
-        onResults(data, "flight", { ...flightParams, tripType });
+        // onResults(data, "flight", { ...flightParams, tripType }); // Handled in the if/else above
       } else {
         onError("Hotel search is currently being updated.");
         setLoading(false);
@@ -182,12 +228,15 @@ export default function SearchForm({
   ];
 
   // Button enable condition – only core search fields required
-  const isFormValid = !!(
-    flightParams.origin &&
-    flightParams.destination &&
-    flightParams.departureDate &&
-    (tripType === "round" ? flightParams.returnDate : true)
-  );
+  const isFormValid =
+    tripType === "multicity"
+      ? legs.every((l) => l.origin && l.destination && l.departureDate)
+      : !!(
+        flightParams.origin &&
+        flightParams.destination &&
+        flightParams.departureDate &&
+        (tripType === "round" ? flightParams.returnDate : true)
+      );
 
   return (
     <>
@@ -218,7 +267,7 @@ export default function SearchForm({
             <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-5">
               {/* Trip Type */}
               <div className="flex items-center justify-start gap-5 md:gap-8 text-gray-800 text-sm font-semibold overflow-x-auto no-scrollbar pb-1 mt-1">
-                {["round", "oneway"].map((type) => (
+                {["round", "oneway", "multicity"].map((type) => (
                   <label
                     key={type}
                     className="flex items-center gap-1.5 md:gap-3 cursor-pointer group shrink-0"
@@ -237,86 +286,159 @@ export default function SearchForm({
                       onChange={() => setTripType(type)}
                     />
                     <span className="uppercase tracking-wide text-[9px] md:text-xs font-bold text-gray-600">
-                      {type === "round" ? "Round Trip" : "One Way"}
+                      {type === "round"
+                        ? "Round Trip"
+                        : type === "oneway"
+                          ? "One Way"
+                          : "Multi-City"}
                     </span>
                   </label>
                 ))}
               </div>
 
-              {/* Inputs Row 1 */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-3">
-                <div className="relative">
-                  <InputField
-                    icon={<FaMapMarkerAlt />}
-                    placeholder="FROM: Origin"
-                    name="origin"
-                    value={flightParams.origin}
-                    onChange={handleFlightChange}
-                    required={!flightParams.origin}
-                    enableAirportAutocomplete
-                  />
-                </div>
-                <div className="relative">
-                  <InputField
-                    icon={<FaMapMarkerAlt />}
-                    placeholder="TO: Destination"
-                    name="destination"
-                    value={flightParams.destination}
-                    onChange={handleFlightChange}
-                    enableAirportAutocomplete
-                  />
-                </div>
-
-                {/* Custom Date Inputs */}
-                <div className="relative" ref={departureRef}>
-                  <div
-                    onClick={() => setShowDeparturePicker(!showDeparturePicker)}
-                    className="w-full pl-10 md:pl-12 pr-4 py-3 md:py-4 bg-white text-gray-800 border border-gray-200 rounded-md text-xs md:text-sm cursor-pointer flex items-center justify-between shadow-lg"
-                  >
-                    <div className="flex items-center gap-3">
-                      <FaCalendarAlt className="text-gray-400" />
-                      <span className="truncate">
-                        {flightParams.departureDate || "Departure"}
-                      </span>
-                    </div>
-                    <FaChevronDown className="text-gray-300 text-[10px]" />
-                  </div>
-                  {showDeparturePicker && (
-                    <CalendarOverlay
-                      onSelect={(d) => handleDateSelect(d, "departure")}
-                      selected={flightParams.departureDate}
-                      minDate={todayIso}
-                      onClose={() => setShowDeparturePicker(false)}
+              {/* Inputs Row 1 - Standard (One Way / Round Trip) */}
+              {tripType !== "multicity" && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-3">
+                  <div className="relative">
+                    <InputField
+                      icon={<FaMapMarkerAlt />}
+                      placeholder="FROM: Origin"
+                      name="origin"
+                      value={flightParams.origin}
+                      onChange={handleFlightChange}
+                      required={!flightParams.origin}
+                      enableAirportAutocomplete
                     />
-                  )}
-                </div>
-
-                <div className="relative" ref={returnRef}>
-                  <div
-                    onClick={() =>
-                      tripType === "round" &&
-                      setShowReturnPicker(!showReturnPicker)
-                    }
-                    className={`w-full pl-10 md:pl-12 pr-4 py-3 md:py-4 bg-white text-gray-800 border border-gray-200 rounded-md text-xs md:text-sm flex items-center justify-between shadow-lg ${tripType === "oneway" ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <FaCalendarAlt className="text-gray-400" />
-                      <span className="truncate">
-                        {flightParams.returnDate || "Return"}
-                      </span>
-                    </div>
-                    <FaChevronDown className="text-gray-300 text-[10px]" />
                   </div>
-                  {showReturnPicker && (
-                    <CalendarOverlay
-                      onSelect={(d) => handleDateSelect(d, "return")}
-                      selected={flightParams.returnDate}
-                      minDate={flightParams.departureDate}
-                      onClose={() => setShowReturnPicker(false)}
+                  <div className="relative">
+                    <InputField
+                      icon={<FaMapMarkerAlt />}
+                      placeholder="TO: Destination"
+                      name="destination"
+                      value={flightParams.destination}
+                      onChange={handleFlightChange}
+                      enableAirportAutocomplete
                     />
-                  )}
+                  </div>
+
+                  {/* Custom Date Inputs */}
+                  <div className="relative" ref={departureRef}>
+                    <div
+                      onClick={() =>
+                        setShowDeparturePicker(!showDeparturePicker)
+                      }
+                      className="w-full pl-10 md:pl-12 pr-4 py-3 md:py-4 bg-white text-gray-800 border border-gray-200 rounded-md text-xs md:text-sm cursor-pointer flex items-center justify-between shadow-lg"
+                    >
+                      <div className="flex items-center gap-3">
+                        <FaCalendarAlt className="text-gray-400" />
+                        <span className="truncate">
+                          {flightParams.departureDate || "Departure"}
+                        </span>
+                      </div>
+                      <FaChevronDown className="text-gray-300 text-[10px]" />
+                    </div>
+                    {showDeparturePicker && (
+                      <CalendarOverlay
+                        onSelect={(d) => handleDateSelect(d, "departure")}
+                        selected={flightParams.departureDate}
+                        minDate={todayIso}
+                        onClose={() => setShowDeparturePicker(false)}
+                      />
+                    )}
+                  </div>
+
+                  <div className="relative" ref={returnRef}>
+                    <div
+                      onClick={() =>
+                        tripType === "round" &&
+                        setShowReturnPicker(!showReturnPicker)
+                      }
+                      className={`w-full pl-10 md:pl-12 pr-4 py-3 md:py-4 bg-white text-gray-800 border border-gray-200 rounded-md text-xs md:text-sm flex items-center justify-between shadow-lg ${tripType === "oneway" ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <FaCalendarAlt className="text-gray-400" />
+                        <span className="truncate">
+                          {flightParams.returnDate || "Return"}
+                        </span>
+                      </div>
+                      <FaChevronDown className="text-gray-300 text-[10px]" />
+                    </div>
+                    {showReturnPicker && (
+                      <CalendarOverlay
+                        onSelect={(d) => handleDateSelect(d, "return")}
+                        selected={flightParams.returnDate}
+                        minDate={flightParams.departureDate}
+                        onClose={() => setShowReturnPicker(false)}
+                      />
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {/* Multi-City Legs */}
+              {tripType === "multicity" && (
+                <div className="space-y-2 mt-2">
+                  {legs.map((leg, index) => (
+                    <div
+                      key={index}
+                      className="grid grid-cols-1 md:grid-cols-12 gap-2 items-center bg-gray-50/30 p-2 md:p-3 rounded-xl border border-gray-100 hover:border-gray-200 transition-all transition-duration-300"
+                    >
+                      <div className="md:col-span-4 relative group">
+                        <InputField
+                          icon={<FaMapMarkerAlt className="text-xs" />}
+                          placeholder="Origin"
+                          value={leg.origin}
+                          onChange={(e: any) =>
+                            handleLegChange(index, "origin", e.target.value)
+                          }
+                          enableAirportAutocomplete
+                        />
+                      </div>
+                      <div className="md:col-span-4 relative group">
+                        <InputField
+                          icon={<FaMapMarkerAlt className="text-xs" />}
+                          placeholder="Destination"
+                          value={leg.destination}
+                          onChange={(e: any) =>
+                            handleLegChange(index, "destination", e.target.value)
+                          }
+                          enableAirportAutocomplete
+                        />
+                      </div>
+                      <div className="md:col-span-3 relative">
+                        <DepartureDatePicker
+                          value={leg.departureDate}
+                          onSelect={(d: string) =>
+                            handleLegChange(index, "departureDate", d)
+                          }
+                          minDate={index > 0 ? legs[index - 1].departureDate : todayIso}
+                        />
+                      </div>
+                      <div className="md:col-span-1 flex justify-center">
+                        {legs.length > 2 && (
+                          <button
+                            type="button"
+                            onClick={() => removeLeg(index)}
+                            className="w-8 h-8 rounded-full bg-white border border-gray-100 flex items-center justify-center text-gray-300 hover:text-red-500 hover:border-red-100 transition-all shadow-sm group"
+                          >
+                            <FaTimes size={12} />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                  <div className="flex justify-start pt-1">
+                    <button
+                      type="button"
+                      onClick={addLeg}
+                      disabled={legs.length >= 5}
+                      className="flex items-center gap-2 px-5 py-2 bg-white border border-dashed border-gray-200 rounded-lg text-[10px] font-bold uppercase tracking-widest text-gray-400 hover:border-[#f6405f] hover:text-[#f6405f] transition-all"
+                    >
+                      <span className="text-lg">+</span> Add Flight
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* Inputs Row 2: Selectors */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -586,6 +708,46 @@ const fetchAirportSuggestions = async (
     );
   });
 };
+
+function DepartureDatePicker({ value, onSelect, minDate }: any) {
+  const [show, setShow] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (ref.current && !ref.current.contains(event.target as Node))
+        setShow(false);
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  return (
+    <div className="relative" ref={ref}>
+      <div
+        onClick={() => setShow(!show)}
+        className="w-full pl-10 pr-4 py-3.5 bg-white text-gray-800 border border-gray-200 rounded-lg text-xs cursor-pointer flex items-center justify-between shadow-sm hover:border-blue-300 transition-all font-bold"
+      >
+        <div className="flex items-center gap-2 truncate">
+          <FaCalendarAlt className="text-gray-400 shrink-0" size={10} />
+          <span className="truncate">{value || "Select Date"}</span>
+        </div>
+        <FaChevronDown className="text-gray-300 text-[10px] shrink-0" />
+      </div>
+      {show && (
+        <CalendarOverlay
+          onSelect={(d) => {
+            onSelect(d);
+            setShow(false);
+          }}
+          selected={value}
+          minDate={minDate}
+          onClose={() => setShow(false)}
+        />
+      )}
+    </div>
+  );
+}
 
 function InputField({
   icon,
